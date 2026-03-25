@@ -1,0 +1,7 @@
+{
+  "name": "মাদ্রাসা ওয়েবসাইট (Madrasa Website)",
+  "description": "একটি আধুনিক মাদ্রাসার পূর্ণাঙ্গ ওয়েবসাইট যেখানে ভর্তি, ফলাফল এবং নোটিশ বোর্ড রয়েছে।",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
