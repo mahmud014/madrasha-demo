@@ -30,7 +30,7 @@ export default function Navbar() {
     return () => unsubscribe();
   }, []);
 
-  const isAdmin = user?.email === 'anik955720@gmail.com';
+  const isAdmin = !!user;
 
   const toggleLanguage = () => {
     setLanguage(language === 'bn' ? 'en' : 'bn');

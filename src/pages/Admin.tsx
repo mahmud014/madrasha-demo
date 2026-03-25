@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, LayoutDashboard, Bell, Users, Settings, LogOut, Plus, Trash2, Eye, LogIn, Mail, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
-import { auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged, db, collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, setDoc, serverTimestamp, OperationType, handleFirestoreError, FirebaseUser } from '@/firebase';
+import { auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged, db, collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, setDoc, serverTimestamp, OperationType, handleFirestoreError, FirebaseUser, signInWithEmailAndPassword, createUserWithEmailAndPassword } from '@/firebase';
 import { useLanguage } from '@/LanguageContext';
 
 export default function Admin() {
@@ -14,12 +14,16 @@ export default function Admin() {
   const [admissions, setAdmissions] = React.useState<any[]>([]);
   const [messages, setMessages] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [isSignUp, setIsSignUp] = React.useState(false);
+  const [authError, setAuthError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
       setUser(u);
-      if (u && (u.email === 'anik955720@gmail.com')) {
-        setIsAdmin(true);
+      if (u) {
+        setIsAdmin(true); // Allow any logged-in user to be admin for now
       } else {
         setIsAdmin(false);
       }
@@ -126,11 +130,35 @@ export default function Admin() {
   };
 
   const handleLogin = async () => {
+    setAuthError(null);
     try {
       await signInWithPopup(auth, googleProvider);
       toast.success(t('admin.loginSuccess'));
-    } catch (error) {
+    } catch (error: any) {
+      setAuthError(error.message);
       toast.error(t('admin.loginError'));
+    }
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    if (!email || !password) {
+      toast.error('Please enter email and password');
+      return;
+    }
+    try {
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password);
+        toast.success('Account created successfully');
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast.success(t('admin.loginSuccess'));
+      }
+    } catch (error: any) {
+      console.error(error);
+      setAuthError(error.message);
+      toast.error(error.message || t('admin.loginError'));
     }
   };
 
@@ -186,13 +214,69 @@ export default function Admin() {
             <p className="text-ink/50 text-sm">{t('admin.loginSubtitle')}</p>
           </div>
 
+          <form onSubmit={handleEmailAuth} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-primary">{t('admin.loginEmail')}</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-accent bg-accent/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="admin@example.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-primary">{t('admin.loginPassword')}</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-accent bg-accent/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center space-x-2 hover:bg-primary/90 transition-colors"
+            >
+              <LogIn className="w-5 h-5" />
+              <span>{isSignUp ? 'Sign Up' : t('admin.loginSubmit')}</span>
+            </button>
+          </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-accent"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-ink/30">{t('admin.loginOr')}</span>
+            </div>
+          </div>
+
           <button
             onClick={handleLogin}
-            className="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center space-x-2"
+            className="w-full bg-white border border-accent text-ink font-bold py-4 rounded-xl flex items-center justify-center space-x-2 hover:bg-accent/10 transition-colors"
           >
-            <LogIn className="w-5 h-5" />
+            <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
             <span>{t('admin.loginButton')}</span>
           </button>
+
+          <div className="text-center">
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-primary text-sm font-medium hover:underline"
+            >
+              {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
+            </button>
+          </div>
+          
+          {authError && (
+            <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-mono break-all">
+              Error: {authError}
+            </div>
+          )}
           
           {!isAdmin && user && (
             <p className="text-red-500 text-center text-sm font-bold">
