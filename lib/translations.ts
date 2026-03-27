@@ -165,6 +165,16 @@ export const translations = {
       uploadDoc: 'ডকুমেন্ট আপলোড (PDF/Image)',
 
     },
+
+  student: {
+  welcome: 'স্বাগতম',
+  attendanceSummary: 'হাজিরা সংক্ষেপ',
+  dueFees: 'বকেয়া ফি',
+  recentNotice: 'সাম্প্রতিক নোটিশ',
+  idCard: 'ডিজিটাল আইডি কার্ড',
+  downloadReceipt: 'রসিদ ডাউনলোড',
+  applyLeave: 'ছুটির আবেদন',
+  }
   },
   en: {
     nav: {
@@ -285,6 +295,15 @@ export const translations = {
     noticeBoard: {
       title: 'Notice Board', viewAll: 'View All', notFound: 'No notices found.',
     },
+    student: {
+  welcome: 'Welcome',
+  attendanceSummary: 'Attendance Summary',
+  dueFees: 'Due Fees',
+  recentNotice: 'Recent Notices',
+  idCard: 'Digital ID Card',
+  downloadReceipt: 'Download Receipt',
+  applyLeave: 'Apply for Leave',
+},
     admin: {
       loading: 'Loading...', loginTitle: 'Admin Login', loginSubtitle: 'Enter the admin panel.',
       loginEmail: 'Email', loginPassword: 'Password', loginSubmit: 'Login',
