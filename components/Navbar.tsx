@@ -70,7 +70,7 @@ export default function Navbar() {
                 <span>{language === 'bn' ? 'EN' : 'বাংলা'}</span>
               </button>
               <Link
-                href="/admin"
+                href="/admin/dashboard"
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center space-x-1.5",
                   isAdmin ? "bg-secondary text-white shadow-lg shadow-secondary/20" : "bg-primary/10 text-primary hover:bg-primary/20"
