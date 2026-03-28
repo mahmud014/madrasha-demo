@@ -4,12 +4,11 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { User, Mail, Lock, ArrowRight, IdCard, GraduationCap, Briefcase } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, IdCard, GraduationCap, Briefcase, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export default function RegisterPage() {
-  // role 'parent' কে আমরা স্টুডেন্ট হিসেবে এবং 'admin' কে টিচার হিসেবে ট্রিট করছি
   const [formData, setFormData] = useState({ 
     name: '', 
     email: '', 
@@ -18,6 +17,7 @@ export default function RegisterPage() {
     id: '' 
   });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // পাসওয়ার্ড দেখানোর স্টেট
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,13 +34,13 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success('রেজিস্ট্রেশন সফল হয়েছে! লগইন করুন।');
+        toast.success('রেজিস্ট্রেশন সফল হয়েছে! লগইন করুন।');
         router.push('/login');
       } else {
-        toast.error(data.message || 'রেজিস্ট্রেশন ব্যর্থ হয়েছে');
+        toast.error(data.message || 'রেজিস্ট্রেশন ব্যর্থ হয়েছে');
       }
     } catch (error) {
-      toast.error('কিছু একটা ভুল হয়েছে!');
+      toast.error('কিছু একটা ভুল হয়েছে!');
     } finally {
       setLoading(false);
     }
@@ -55,10 +55,10 @@ export default function RegisterPage() {
       >
         <div className="text-center mb-8">
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Create Account</h2>
-          <p className="text-slate-500 mt-2 font-medium">আমাদের মাদরাসা ম্যানেজমেন্ট সিস্টেমে যোগ দিন</p>
+          <p className="text-slate-500 mt-2 font-medium">মাদরাসা ম্যানেজমেন্ট সিস্টেমে যোগ দিন</p>
         </div>
 
-        {/* Custom Animated Toggle Switch */}
+        {/* Role Selection */}
         <div className="relative flex bg-slate-100 p-1.5 rounded-2xl mb-8">
           <motion.div
             className="absolute inset-y-1.5 bg-white rounded-xl shadow-sm z-0"
@@ -67,13 +67,12 @@ export default function RegisterPage() {
               x: formData.role === 'parent' ? 0 : '100%',
               width: 'calc(50% - 6px)'
             }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
           />
           <button
             type="button"
             onClick={() => setFormData({ ...formData, role: 'parent' })}
             className={cn(
-              "relative z-10 w-1/2 py-2.5 text-sm font-bold flex items-center justify-center space-x-2 transition-colors",
+              "relative z-10 w-1/2 py-2.5 text-sm font-bold flex items-center justify-center space-x-2",
               formData.role === 'parent' ? "text-primary" : "text-slate-500"
             )}
           >
@@ -84,7 +83,7 @@ export default function RegisterPage() {
             type="button"
             onClick={() => setFormData({ ...formData, role: 'admin' })}
             className={cn(
-              "relative z-10 w-1/2 py-2.5 text-sm font-bold flex items-center justify-center space-x-2 transition-colors",
+              "relative z-10 w-1/2 py-2.5 text-sm font-bold flex items-center justify-center space-x-2",
               formData.role === 'admin' ? "text-primary" : "text-slate-500"
             )}
           >
@@ -94,7 +93,7 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* ID Field */}
+          {/* ID */}
           <div className="relative">
             <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
@@ -130,22 +129,29 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Password */}
+          {/* Password with Show/Hide */}
           <div className="relative">
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               required
-              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 rounded-2xl border border-slate-100 focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium"
+              className="w-full pl-12 pr-12 py-3.5 bg-slate-50 rounded-2xl border border-slate-100 focus:bg-white focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all font-medium"
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white py-4 rounded-2xl font-bold shadow-xl shadow-primary/20 hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center space-x-2 disabled:opacity-70 disabled:pointer-events-none mt-4"
+            className="w-full bg-primary text-white py-4 rounded-2xl font-bold shadow-xl shadow-primary/20 hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center space-x-2 disabled:opacity-70 mt-4"
           >
             {loading ? (
               <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />

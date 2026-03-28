@@ -5,25 +5,27 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const { id, password } = await req.json();
     await dbConnect();
 
-    const user = await User.findOne({ email });
+    // আইডি দিয়ে ইউজার খোঁজা
+    const user = await User.findOne({ id });
     if (!user) {
-      return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
+      return NextResponse.json({ message: "ইউজার আইডি সঠিক নয়" }, { status: 404 });
     }
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) {
-      return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
+    // পাসওয়ার্ড চেক
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return NextResponse.json({ message: "ভুল পাসওয়ার্ড" }, { status: 401 });
     }
 
-    // এখানে আপনি সেশন বা JWT রিটার্ন করবেন
-    return NextResponse.json({
-      message: "Login successful",
-      user: { id: user._id, name: user.name, role: user.role }
-    });
+    return NextResponse.json({ 
+      message: "লগইন সফল",
+      user: { name: user.name, role: user.role, id: user.id } 
+    }, { status: 200 });
+    
   } catch (error) {
-    return NextResponse.json({ message: "Login failed" }, { status: 500 });
+    return NextResponse.json({ message: "লগইন করতে সমস্যা হয়েছে" }, { status: 500 });
   }
 }
