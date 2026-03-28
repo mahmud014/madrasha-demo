@@ -174,6 +174,11 @@ export const translations = {
       tableEventDate: 'তারিখ',
       tableEventTime: 'সময়',
       tableEventTag: 'ট্যাগ/ইমোজি',
+      navUsers: 'ইউজার ম্যানেজমেন্ট',
+      tableUserName: 'ব্যবহারকারীর নাম',
+      tableUserEmail: 'ইমেইল',
+      tableUserRole: 'রোল',
+      actionChangeRole: 'রোল পরিবর্তন',
 
     },
 
@@ -357,6 +362,11 @@ export const translations = {
       tableEventDate: 'Date',
       tableEventTime: 'Time',
       tableEventTag: 'Tag/Emoji',
+      navUsers: 'User Management',
+      tableUserName: 'User Name',
+      tableUserEmail: 'Email',
+      tableUserRole: 'Role',
+      actionChangeRole: 'Change Role',
 
       // Finance & Attendance Related
       navStudents: 'Student Info',

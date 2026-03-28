@@ -93,7 +93,7 @@ export default function Home() {
             <div className="inline-block px-4 py-1 bg-primary/10 text-primary rounded-full text-sm font-bold uppercase tracking-wider">{t('home.principalMessageTitle')}</div>
             <div className="flex flex-col md:flex-row gap-8 items-start">
               <div className="w-full md:w-48 shrink-0">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400" alt="Principal" className="w-full aspect-square object-cover rounded-2xl shadow-lg" referrerPolicy="no-referrer" />
+                <img src="https://i.ibb.co.com/RTR5S0fh/Muhammadullah-Hafezzi.jpg" />
               </div>
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-primary">{t('home.principalGreeting')}</h2>

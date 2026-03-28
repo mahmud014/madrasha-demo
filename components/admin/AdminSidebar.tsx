@@ -10,6 +10,7 @@ export default function AdminSidebar() {
 
   const navItems = [
     { href: '/admin/dashboard', label: t('admin.navDashboard') },
+    { href: '/admin/users', label: t('admin.navUsers') },
     { href: '/admin/finance', label: t('admin.navFinance') },
     { href: '/admin/attendance', label: t('admin.navAttendance') },
     { href: '/admin/students', label: t('admin.navStudents') },
