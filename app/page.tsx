@@ -1,12 +1,17 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'motion/react';
-import { ArrowRight, Users, GraduationCap, BookOpen, Heart, Mic2, Languages, CalendarDays, Clock } from 'lucide-react';
+import { motion } from 'framer-motion'; // motion/react এর বদলে standard framer-motion (যদি install থাকে)
+import { ArrowRight, Users, GraduationCap, BookOpen, Heart, Mic2, Languages, Clock } from 'lucide-react';
 import Link from 'next/link';
 import NoticeBoard from '@/components/NoticeBoard';
 import { useLanguage } from '@/context/LanguageContext';
-import { db, doc, onSnapshot } from '@/lib/firebase';
+
+// স্ট্যাটিক সেটিংস ডেটা (Firebase এর পরিবর্তে ডিজাইনের নাম ঠিক রাখার জন্য)
+const staticSettings = {
+  madrasaNameBn: 'আল-হিকমাহ ইসলামিয়া মাদ্রাসা',
+  madrasaNameEn: 'Al-Hikmah Islamic Madrasa',
+};
 
 const stats = [
   { key: 'students', value: '১২০০+', icon: Users },
@@ -31,16 +36,9 @@ const events = [
 
 export default function Home() {
   const { t, language } = useLanguage();
-  const [settings, setSettings] = React.useState<any>(null);
 
-  React.useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'settings', 'general'), (d) => {
-      if (d.exists()) setSettings(d.data());
-    });
-    return () => unsub();
-  }, []);
-
-  const madrasaName = settings ? (language === 'bn' ? settings.madrasaNameBn : settings.madrasaNameEn) : t('footer.aboutTitle');
+  // Firebase এর বদলে সরাসরি স্ট্যাটিক ডেটা থেকে নাম নেওয়া হচ্ছে
+  const madrasaName = language === 'bn' ? staticSettings.madrasaNameBn : staticSettings.madrasaNameEn;
 
   return (
     <div className="space-y-20 pb-20">

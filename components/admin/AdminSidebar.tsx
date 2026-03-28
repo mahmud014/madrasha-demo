@@ -13,9 +13,11 @@ export default function AdminSidebar() {
     { href: '/admin/finance', label: t('admin.navFinance') },
     { href: '/admin/attendance', label: t('admin.navAttendance') },
     { href: '/admin/students', label: t('admin.navStudents') },
+    { href: '/admin/events', label: t('admin.navEvents') },
     { href: '/admin/notices', label: t('admin.navNotices') },
     { href: '/admin/results', label: t('admin.navResults') },
     { href: '/admin/admissions', label: t('admin.navAdmissions') },
+    { href: '/admin/leave-requests', label: t('admin.navLeaveRequests')},
     { href: '/admin/messages', label: t('admin.navMessages') },
     { href: '/admin/settings', label: t('admin.navSettings') },
   ];

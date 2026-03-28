@@ -1,24 +1,40 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Share2, Globe, Video, Mail, Phone, MapPin } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
-import { db, doc, onSnapshot } from '@/lib/firebase';
 
 export default function Footer() {
   const { t, language } = useLanguage();
-  const [settings, setSettings] = React.useState<any>(null);
+  const [settings, setSettings] = useState<any>(null);
 
-  React.useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'settings', 'general'), (d) => {
-      if (d.exists()) setSettings(d.data());
-    });
-    return () => unsub();
+  useEffect(() => {
+    // MongoDB থেকে সেটিংস নিয়ে আসা
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          const data = await res.json();
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error("Failed to load settings:", error);
+      }
+    };
+
+    fetchSettings();
   }, []);
 
-  const madrasaName = settings ? (language === 'bn' ? settings.madrasaNameBn : settings.madrasaNameEn) : t('footer.aboutTitle');
-  const address = settings ? (language === 'bn' ? settings.addressBn : settings.addressEn) : 'ঢাকা, বাংলাদেশ';
+  // সেটিংস না থাকলে ডিফল্ট ভ্যালু
+  const madrasaName = settings?._id 
+    ? (language === 'bn' ? settings.madrasaNameBn : settings.madrasaNameEn) 
+    : "মাদরাসা ম্যানেজমেন্ট";
+
+  const address = settings?._id 
+    ? (language === 'bn' ? settings.addressBn : settings.addressEn) 
+    : 'ঢাকা, বাংলাদেশ';
+
   const phone = settings?.phone || '+৮৮০ ১২৩৪ ৫৬৭৮৯০';
   const email = settings?.email || 'info@madrasa.com';
 
@@ -26,9 +42,13 @@ export default function Footer() {
     <footer className="bg-primary text-white pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          
+          {/* About Section */}
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary font-bold text-lg">{madrasaName.charAt(0)}</div>
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary font-bold text-lg">
+                {madrasaName ? madrasaName.charAt(0) : "M"}
+              </div>
               <span className="text-xl font-bold">{madrasaName}</span>
             </div>
             <p className="text-white/70 text-sm leading-relaxed">{t('footer.aboutDesc')}</p>
@@ -39,6 +59,7 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Quick Links */}
           <div>
             <h3 className="text-lg font-bold mb-6 border-b border-white/10 pb-2">{t('footer.quickLinks')}</h3>
             <ul className="space-y-3 text-sm text-white/70">
@@ -49,6 +70,7 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Important Links */}
           <div>
             <h3 className="text-lg font-bold mb-6 border-b border-white/10 pb-2">{t('footer.importantLinks')}</h3>
             <ul className="space-y-3 text-sm text-white/70">
@@ -59,14 +81,25 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Contact Info */}
           <div>
             <h3 className="text-lg font-bold mb-6 border-b border-white/10 pb-2">{t('footer.contact')}</h3>
             <ul className="space-y-4 text-sm text-white/70">
-              <li className="flex items-start space-x-3"><MapPin className="w-5 h-5 text-secondary shrink-0" /><span>{address}</span></li>
-              <li className="flex items-center space-x-3"><Phone className="w-5 h-5 text-secondary shrink-0" /><span>{phone}</span></li>
-              <li className="flex items-center space-x-3"><Mail className="w-5 h-5 text-secondary shrink-0" /><span>{email}</span></li>
+              <li className="flex items-start space-x-3">
+                <MapPin className="w-5 h-5 text-secondary shrink-0" />
+                <span>{address}</span>
+              </li>
+              <li className="flex items-center space-x-3">
+                <Phone className="w-5 h-5 text-secondary shrink-0" />
+                <span>{phone}</span>
+              </li>
+              <li className="flex items-center space-x-3">
+                <Mail className="w-5 h-5 text-secondary shrink-0" />
+                <span>{email}</span>
+              </li>
             </ul>
           </div>
+
         </div>
 
         <div className="mt-16 pt-8 border-t border-white/10 text-center text-sm text-white/50">

@@ -163,18 +163,29 @@ export const translations = {
       filterBySection: 'সেকশন অনুযায়ী খুঁজুন',
       uploadPhoto: 'ছবি আপলোড করুন',
       uploadDoc: 'ডকুমেন্ট আপলোড (PDF/Image)',
+      navLeaveRequests: 'ছুটির আবেদনসমূহ',
+      tableReason: 'কারণ',
+      tableStatus: 'অবস্থা',
+      actionApprove: 'মঞ্জুর',
+      actionReject: 'প্রত্যাখ্যান',
+      navEvents: 'ইভেন্ট ম্যানেজমেন্ট',
+      addEvent: 'নতুন ইভেন্ট যোগ করুন',
+      tableEventTitle: 'ইভেন্টের নাম',
+      tableEventDate: 'তারিখ',
+      tableEventTime: 'সময়',
+      tableEventTag: 'ট্যাগ/ইমোজি',
 
     },
 
-  student: {
-  welcome: 'স্বাগতম',
-  attendanceSummary: 'হাজিরা সংক্ষেপ',
-  dueFees: 'বকেয়া ফি',
-  recentNotice: 'সাম্প্রতিক নোটিশ',
-  idCard: 'ডিজিটাল আইডি কার্ড',
-  downloadReceipt: 'রসিদ ডাউনলোড',
-  applyLeave: 'ছুটির আবেদন',
-  }
+    student: {
+      welcome: 'স্বাগতম',
+      attendanceSummary: 'হাজিরা সংক্ষেপ',
+      dueFees: 'বকেয়া ফি',
+      recentNotice: 'সাম্প্রতিক নোটিশ',
+      idCard: 'ডিজিটাল আইডি কার্ড',
+      downloadReceipt: 'রসিদ ডাউনলোড',
+      applyLeave: 'ছুটির আবেদন',
+    }
   },
   en: {
     nav: {
@@ -296,14 +307,14 @@ export const translations = {
       title: 'Notice Board', viewAll: 'View All', notFound: 'No notices found.',
     },
     student: {
-  welcome: 'Welcome',
-  attendanceSummary: 'Attendance Summary',
-  dueFees: 'Due Fees',
-  recentNotice: 'Recent Notices',
-  idCard: 'Digital ID Card',
-  downloadReceipt: 'Download Receipt',
-  applyLeave: 'Apply for Leave',
-},
+      welcome: 'Welcome',
+      attendanceSummary: 'Attendance Summary',
+      dueFees: 'Due Fees',
+      recentNotice: 'Recent Notices',
+      idCard: 'Digital ID Card',
+      downloadReceipt: 'Download Receipt',
+      applyLeave: 'Apply for Leave',
+    },
     admin: {
       loading: 'Loading...', loginTitle: 'Admin Login', loginSubtitle: 'Enter the admin panel.',
       loginEmail: 'Email', loginPassword: 'Password', loginSubmit: 'Login',
@@ -335,7 +346,17 @@ export const translations = {
       studentRoll: 'Roll Number',
       paymentSuccess: 'Payment recorded successfully',
       navDashboard: 'Dashboard',
-
+      navLeaveRequests: 'Leave Requests',
+      tableReason: 'Reason',
+      tableStatus: 'Status',
+      actionApprove: 'Approve',
+      actionReject: 'Reject',
+      navEvents: 'Event Management',
+      addEvent: 'Add New Event',
+      tableEventTitle: 'Event Title',
+      tableEventDate: 'Date',
+      tableEventTime: 'Time',
+      tableEventTag: 'Tag/Emoji',
 
       // Finance & Attendance Related
       navStudents: 'Student Info',
