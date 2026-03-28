@@ -11,13 +11,14 @@ const SettingSchema = new mongoose.Schema({
   email: String,
 });
 
-const Setting = mongoose.models.Setting || mongoose.model("Setting", SettingSchema);
+const Setting =
+  mongoose.models.Setting || mongoose.model("Setting", SettingSchema);
 
 export async function GET() {
   try {
     await dbConnect();
     // 'general' সেটিংস খুঁজে বের করা
-    const settings = await Setting.findOne(); 
+    const settings = await Setting.findOne();
     return NextResponse.json(settings || {});
   } catch (error) {
     return NextResponse.json({}, { status: 500 });

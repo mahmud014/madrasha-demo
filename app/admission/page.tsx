@@ -1,99 +1,289 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { motion } from 'motion/react';
-import { Send, User, Phone, MapPin, Book, Calendar } from 'lucide-react';
-import { db, collection, addDoc, serverTimestamp, OperationType, handleFirestoreError } from '@/lib/firebase';
-import { useLanguage } from '@/context/LanguageContext';
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { motion } from "motion/react";
+import { Send, User, Phone, MapPin, Book, Calendar, Home } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface AdmissionFormData {
-  studentName: string; fatherName: string; motherName: string;
-  dob: string; gender: string; department: string; phone: string; address: string;
+  studentNameEn: string;
+  studentNameBn: string;
+  dob: string;
+  gender: string;
+  bloodGroup: string;
+  birthRegNo: string;
+  fatherName: string;
+  motherName: string;
+  guardianPhone: string;
+  department: string;
+  previousSchool: string;
+  presentAddress: string;
+  permanentAddress: string;
 }
 
 export default function Admission() {
   const { t } = useLanguage();
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<AdmissionFormData>();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting, errors },
+  } = useForm<AdmissionFormData>();
 
   const onSubmit = async (data: AdmissionFormData) => {
     try {
-      await addDoc(collection(db, 'admissions'), { ...data, status: 'pending', createdAt: serverTimestamp() });
-      toast.success(t('admission.formSubmitSuccess'));
+      const response = await fetch("/api/admission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, status: "pending" }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Submission failed");
+      }
+
+      toast.success(t("admission.formSubmitSuccess"));
       reset();
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'admissions');
-      toast.error(t('admission.formSubmitError'));
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Something went wrong";
+      console.error("Submission error:", errorMessage);
+      toast.error(`${t("admission.formSubmitError")}`);
     }
   };
 
-  const inputClass = "w-full px-4 py-3 rounded-xl border border-accent bg-accent/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all";
+  const inputClass =
+    "w-full px-4 py-3 rounded-xl border border-accent bg-accent/5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all";
+  const labelClass = "text-sm font-bold text-primary flex items-center mb-1";
+  const errorText = "text-red-500 text-xs mt-1 ml-1";
 
   return (
-    <div className="pb-20">
-      <section className="bg-primary text-white py-24 text-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-          <h1 className="text-4xl md:text-6xl font-bold">{t('admission.title')}</h1>
-          <p className="text-white/70 max-w-2xl mx-auto">{t('admission.subtitle')}</p>
+    <div className="pb-20 bg-gray-50/50">
+      <section className="bg-primary text-white py-20 text-center">
+        <div className="max-w-7xl mx-auto px-4 space-y-4">
+          <h1 className="text-4xl md:text-5xl font-bold">
+            {t("admission.title")}
+          </h1>
+          <p className="text-white/70 max-w-2xl mx-auto">
+            {t("admission.subtitle")}
+          </p>
         </div>
       </section>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl p-8 md:p-12 card-shadow border border-accent/50">
-          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center"><User className="w-4 h-4 mr-2" />{t('admission.studentName')}</label>
-              <input {...register('studentName', { required: t('admission.requiredName') })} className={inputClass} placeholder={t('admission.placeholderName')} />
-              {errors.studentName && <p className="text-red-500 text-xs">{errors.studentName.message}</p>}
+      <div className="max-w-5xl mx-auto px-4 -mt-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-accent/20"
+        >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+            {/* --- Section 1: Personal Info --- */}
+            <div>
+              <h3 className="text-lg font-bold text-secondary mb-6 flex items-center border-b pb-2">
+                <User className="mr-2 w-5 h-5" /> {t("admission.personalInfo")}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    {t("admission.studentNameEn")}
+                  </label>
+                  <input
+                    {...register("studentNameEn", { required: true })}
+                    className={inputClass}
+                    placeholder={t("admission.placeholderNameEn")}
+                  />
+                  {errors.studentNameEn && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    {t("admission.studentNameBn")}
+                  </label>
+                  <input
+                    {...register("studentNameBn", { required: true })}
+                    className={inputClass}
+                    placeholder={t("admission.placeholderNameBn")}
+                  />
+                  {errors.studentNameBn && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    <Calendar className="w-4 h-4 mr-2" /> {t("admission.dob")}
+                  </label>
+                  <input
+                    type="date"
+                    {...register("dob", { required: true })}
+                    className={inputClass}
+                  />
+                  {errors.dob && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className={labelClass}>
+                      {t("admission.gender")}
+                    </label>
+                    <select
+                      {...register("gender", { required: true })}
+                      className={inputClass}
+                    >
+                      <option value="male">{t("admission.male")}</option>
+                      <option value="female">{t("admission.female")}</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className={labelClass}>
+                      {t("admission.bloodGroup")}
+                    </label>
+                    <select {...register("bloodGroup")} className={inputClass}>
+                      <option value="">{t("admission.select")}</option>
+                      <option value="A+">A+</option>
+                      <option value="B+">B+</option>
+                      <option value="O+">O+</option>
+                      <option value="AB+">AB+</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center"><User className="w-4 h-4 mr-2" />{t('admission.fatherName')}</label>
-              <input {...register('fatherName', { required: t('admission.requiredFatherName') })} className={inputClass} placeholder={t('admission.placeholderFatherName')} />
-              {errors.fatherName && <p className="text-red-500 text-xs">{errors.fatherName.message}</p>}
+
+            {/* --- Section 2: Parental Info --- */}
+            <div>
+              <h3 className="text-lg font-bold text-secondary mb-6 flex items-center border-b pb-2">
+                <Home className="mr-2 w-5 h-5" /> {t("admission.parentalInfo")}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    {t("admission.fatherName")}
+                  </label>
+                  <input
+                    {...register("fatherName", { required: true })}
+                    className={inputClass}
+                  />
+                  {errors.fatherName && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    {t("admission.motherName")}
+                  </label>
+                  <input
+                    {...register("motherName", { required: true })}
+                    className={inputClass}
+                  />
+                  {errors.motherName && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    <Phone className="w-4 h-4 mr-2" />{" "}
+                    {t("admission.guardianPhone")}
+                  </label>
+                  <input
+                    {...register("guardianPhone", { required: true })}
+                    className={inputClass}
+                    placeholder={t("admission.placeholderPhone")}
+                  />
+                  {errors.guardianPhone && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center"><User className="w-4 h-4 mr-2" />{t('admission.motherName')}</label>
-              <input {...register('motherName', { required: t('admission.requiredMotherName') })} className={inputClass} placeholder={t('admission.placeholderMotherName')} />
-              {errors.motherName && <p className="text-red-500 text-xs">{errors.motherName.message}</p>}
+
+            {/* --- Section 3: Academic --- */}
+            <div>
+              <h3 className="text-lg font-bold text-secondary mb-6 flex items-center border-b pb-2">
+                <Book className="mr-2 w-5 h-5" /> {t("admission.academicInfo")}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    {t("admission.department")}
+                  </label>
+                  <select
+                    {...register("department", { required: true })}
+                    className={inputClass}
+                  >
+                    <option value="noorani">
+                      {t("admission.deptNoorani")}
+                    </option>
+                    <option value="hifz">{t("admission.deptHifz")}</option>
+                    <option value="kitab">{t("admission.deptKitab")}</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    {t("admission.previousSchool")}
+                  </label>
+                  <input
+                    {...register("previousSchool")}
+                    className={inputClass}
+                    placeholder={t("admission.placeholderSchool")}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center"><Calendar className="w-4 h-4 mr-2" />{t('admission.dob')}</label>
-              <input type="date" {...register('dob', { required: t('admission.requiredDob') })} className={inputClass} />
-              {errors.dob && <p className="text-red-500 text-xs">{errors.dob.message}</p>}
+
+            {/* --- Section 4: Address --- */}
+            <div>
+              <h3 className="text-lg font-bold text-secondary mb-6 flex items-center border-b pb-2">
+                <MapPin className="mr-2 w-5 h-5" /> {t("admission.addressInfo")}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    {t("admission.presentAddress")}
+                  </label>
+                  <textarea
+                    {...register("presentAddress", { required: true })}
+                    rows={2}
+                    className={inputClass}
+                  />
+                  {errors.presentAddress && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    {t("admission.permanentAddress")}
+                  </label>
+                  <textarea
+                    {...register("permanentAddress", { required: true })}
+                    rows={2}
+                    className={inputClass}
+                  />
+                  {errors.permanentAddress && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-primary">{t('admission.gender')}</label>
-              <select {...register('gender', { required: t('admission.requiredGender') })} className={inputClass}>
-                <option value="">{t('admission.select')}</option>
-                <option value="male">{t('admission.male')}</option>
-                <option value="female">{t('admission.female')}</option>
-              </select>
-              {errors.gender && <p className="text-red-500 text-xs">{errors.gender.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center"><Book className="w-4 h-4 mr-2" />{t('admission.department')}</label>
-              <select {...register('department', { required: t('admission.requiredDepartment') })} className={inputClass}>
-                <option value="">{t('admission.select')}</option>
-                <option value="noorani">{t('admission.deptNoorani')}</option>
-                <option value="hifz">{t('admission.deptHifz')}</option>
-                <option value="kitab">{t('admission.deptKitab')}</option>
-              </select>
-              {errors.department && <p className="text-red-500 text-xs">{errors.department.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center"><Phone className="w-4 h-4 mr-2" />{t('admission.phone')}</label>
-              <input {...register('phone', { required: t('admission.requiredPhone') })} className={inputClass} placeholder={t('admission.placeholderPhone')} />
-              {errors.phone && <p className="text-red-500 text-xs">{errors.phone.message}</p>}
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <label className="text-sm font-bold text-primary flex items-center"><MapPin className="w-4 h-4 mr-2" />{t('admission.address')}</label>
-              <textarea {...register('address', { required: t('admission.requiredAddress') })} rows={3} className={inputClass} placeholder={t('admission.placeholderAddress')} />
-              {errors.address && <p className="text-red-500 text-xs">{errors.address.message}</p>}
-            </div>
-            <div className="md:col-span-2 pt-4">
-              <button type="submit" disabled={isSubmitting} className="w-full bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center space-x-2 shadow-lg shadow-primary/20">
-                <span>{isSubmitting ? t('admission.submitting') : t('admission.submit')}</span>
-                {!isSubmitting && <Send className="w-5 h-5" />}
+
+            {/* Submit Button */}
+            <div className="pt-6">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-primary hover:bg-secondary text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center space-x-2 shadow-xl disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <span>{t("admission.submitting")}</span>
+                ) : (
+                  <>
+                    <span>{t("admission.submit")}</span>{" "}
+                    <Send className="w-5 h-5" />
+                  </>
+                )}
               </button>
             </div>
           </form>
