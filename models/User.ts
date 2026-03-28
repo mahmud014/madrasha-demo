@@ -1,16 +1,19 @@
 import mongoose, { Schema, model, models } from 'mongoose';
 
 const UserSchema = new Schema({
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  id: { type: String, required: true, unique: true }, // Student/Teacher ID
   role: { 
     type: String, 
-    enum: ['admin', 'student', 'parent'], // এখানে 'parent' এড করুন কারণ ফ্রন্টএন্ড থেকে 'parent' পাঠাচ্ছেন
+    enum: ['admin', 'student', 'parent'], 
     default: 'student' 
   },
 }, { timestamps: true });
 
-// এই অংশটি গুরুত্বপূর্ণ
-const User = models.User || model('User', UserSchema);
+// আপনার স্ক্রিনশট অনুযায়ী কালেকশনের নাম 'registration' সেট করা হয়েছে
+const User = models.User || model('User', UserSchema, 'registration');
 export default User;
