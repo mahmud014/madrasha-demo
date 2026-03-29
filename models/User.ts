@@ -15,5 +15,6 @@ const UserSchema = new Schema({
 }, { timestamps: true });
 
 // আপনার স্ক্রিনশট অনুযায়ী কালেকশনের নাম 'registration' সেট করা হয়েছে
-const User = models.User || model('User', UserSchema, 'registration');
+// models/User.js ফাইলে পরিবর্তন করুন:
+const User = models.User || model('User', UserSchema, 'users'); // 'registration' এর বদলে 'users' দিন
 export default User;
