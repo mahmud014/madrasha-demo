@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
+import SmoothScroll from "@/components/SmoothScroll/page";
 
 export const metadata: Metadata = {
   title: "Madrasa Website",
@@ -25,7 +26,10 @@ export default function RootLayout({
           <LanguageProvider>
             <div className="min-h-screen flex flex-col">
               <Navbar />
-              <main className="grow">{children}</main>
+
+              <SmoothScroll>
+                <main className="grow">{children}</main>
+              </SmoothScroll>
               <Footer />
               <Toaster position="top-right" richColors />
             </div>
