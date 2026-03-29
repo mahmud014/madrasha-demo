@@ -1,19 +1,22 @@
-import mongoose, { Schema, model, models } from 'mongoose';
+import mongoose, { Schema, model, models } from "mongoose";
 
-const UserSchema = new Schema({
-  resetPasswordToken: { type: String },
-  resetPasswordExpires: { type: Date },
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  id: { type: String, required: true, unique: true }, // Student/Teacher ID
-  role: { 
-    type: String, 
-    enum: ['admin', 'student', 'parent'], 
-    default: 'student' 
+const UserSchema = new Schema(
+  {
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    id: { type: String, required: true, unique: true }, // Student/Teacher ID
+    role: {
+      type: String,
+      enum: ["admin", "student", "parent"],
+      default: "student",
+    },
   },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 // আপনার স্ক্রিনশট অনুযায়ী কালেকশনের নাম 'registration' সেট করা হয়েছে
-const User = models.User || model('User', UserSchema, 'registration');
+const User = models.User || model("User", UserSchema, "registration");
 export default User;

@@ -1,12 +1,21 @@
-import mongoose, { Schema, model, models } from 'mongoose';
+import { Schema, model, models, Document } from "mongoose";
 
-const MessageSchema = new Schema({
+export interface IMessage extends Document {
+  name: string;
+  contact: string;
+  subject: string;
+  message: string;
+  createdAt: Date;
+}
+
+const MessageSchema = new Schema<IMessage>({
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  contact: { type: String, required: true },
   subject: { type: String, required: true },
   message: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
-const Message = models.Message || model('Message', MessageSchema);
+const Message = models.messages || model<IMessage>("messages", MessageSchema);
+
 export default Message;

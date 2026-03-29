@@ -3,12 +3,24 @@
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { motion } from "motion/react";
-import { Send, User, Phone, MapPin, Book, Calendar, Home } from "lucide-react";
+import {
+  Send,
+  User,
+  Phone,
+  MapPin,
+  Book,
+  Calendar,
+  Home,
+  Mail,
+  Image as ImageIcon,
+  School,
+} from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface AdmissionFormData {
   studentNameEn: string;
   studentNameBn: string;
+  email: string;
   dob: string;
   gender: string;
   bloodGroup: string;
@@ -16,10 +28,12 @@ interface AdmissionFormData {
   fatherName: string;
   motherName: string;
   guardianPhone: string;
+  admissionClass: string;
   department: string;
   previousSchool: string;
   presentAddress: string;
   permanentAddress: string;
+  studentPhoto: FileList;
 }
 
 export default function Admission() {
@@ -33,10 +47,21 @@ export default function Admission() {
 
   const onSubmit = async (data: AdmissionFormData) => {
     try {
+      const formData = new FormData();
+
+      Object.keys(data).forEach((key) => {
+        const value = data[key as keyof AdmissionFormData];
+        if (key === "studentPhoto" && value instanceof FileList) {
+          if (value[0]) formData.append(key, value[0]);
+        } else {
+          formData.append(key, value as string);
+        }
+      });
+      formData.append("status", "pending");
+
       const response = await fetch("/api/admission", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, status: "pending" }),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -50,7 +75,7 @@ export default function Admission() {
       const errorMessage =
         error instanceof Error ? error.message : "Something went wrong";
       console.error("Submission error:", errorMessage);
-      toast.error(`${t("admission.formSubmitError")}`);
+      toast.error(t("admission.formSubmitError"));
     }
   };
 
@@ -61,7 +86,18 @@ export default function Admission() {
 
   return (
     <div className="pb-20 bg-gray-50/50">
-      <section className="bg-primary text-white py-20 text-center">
+      {/* Hero Section */}
+      <section className="bg-primary text-white py-24 text-center relative overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 hover:scale-105"
+          style={{
+            backgroundImage: `url('https://i.postimg.cc/vHL75kH0/moon.jpg')`,
+            opacity: 0.2,
+          }}
+        />
+
+        {/* Content */}
         <div className="max-w-7xl mx-auto px-4 space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold">
             {t("admission.title")}
@@ -72,11 +108,11 @@ export default function Admission() {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 -mt-12">
+      <div className="max-w-5xl mx-auto px-4 -mt-12 relative z-50">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-accent/20"
+          className="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-accent/20 "
         >
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
             {/* --- Section 1: Personal Info --- */}
@@ -98,6 +134,7 @@ export default function Admission() {
                     <p className={errorText}>{t("admission.required")}</p>
                   )}
                 </div>
+
                 <div className="space-y-1">
                   <label className={labelClass}>
                     {t("admission.studentNameBn")}
@@ -111,6 +148,38 @@ export default function Admission() {
                     <p className={errorText}>{t("admission.required")}</p>
                   )}
                 </div>
+
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    <Mail className="w-4 h-4 mr-2" /> {t("admission.email")}
+                  </label>
+                  <input
+                    type="email"
+                    {...register("email", { required: true })}
+                    className={inputClass}
+                    placeholder={t("admission.placeholderEmail")}
+                  />
+                  {errors.email && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    <ImageIcon className="w-4 h-4 mr-2" />{" "}
+                    {t("admission.studentPhoto")}
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    {...register("studentPhoto", { required: true })}
+                    className={inputClass}
+                  />
+                  {errors.studentPhoto && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+
                 <div className="space-y-1">
                   <label className={labelClass}>
                     <Calendar className="w-4 h-4 mr-2" /> {t("admission.dob")}
@@ -124,6 +193,21 @@ export default function Admission() {
                     <p className={errorText}>{t("admission.required")}</p>
                   )}
                 </div>
+
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    {t("admission.birthRegNo")}
+                  </label>
+                  <input
+                    {...register("birthRegNo", { required: true })}
+                    className={inputClass}
+                    placeholder="Enter registration number"
+                  />
+                  {errors.birthRegNo && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className={labelClass}>
@@ -205,7 +289,28 @@ export default function Admission() {
               <h3 className="text-lg font-bold text-secondary mb-6 flex items-center border-b pb-2">
                 <Book className="mr-2 w-5 h-5" /> {t("admission.academicInfo")}
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-1">
+                  <label className={labelClass}>
+                    <School className="w-4 h-4 mr-2" />{" "}
+                    {t("admission.admissionClass")}
+                  </label>
+                  <select
+                    {...register("admissionClass", { required: true })}
+                    className={inputClass}
+                  >
+                    <option value="">{t("admission.select")}</option>
+                    <option value="Play">Play</option>
+                    <option value="Nursery">Nursery</option>
+                    <option value="Class 1">Class 1</option>
+                    <option value="Class 2">Class 2</option>
+                    {/* আপনি আপনার মতো আরও ক্লাস যোগ করতে পারেন */}
+                  </select>
+                  {errors.admissionClass && (
+                    <p className={errorText}>{t("admission.required")}</p>
+                  )}
+                </div>
+
                 <div className="space-y-1">
                   <label className={labelClass}>
                     {t("admission.department")}
@@ -269,7 +374,6 @@ export default function Admission() {
               </div>
             </div>
 
-            {/* Submit Button */}
             <div className="pt-6">
               <button
                 type="submit"
@@ -280,8 +384,7 @@ export default function Admission() {
                   <span>{t("admission.submitting")}</span>
                 ) : (
                   <>
-                    <span>{t("admission.submit")}</span>{" "}
-                    <Send className="w-5 h-5" />
+                    <p>{t("admission.submit")}</p> <Send className="w-5 h-5" />
                   </>
                 )}
               </button>

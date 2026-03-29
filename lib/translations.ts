@@ -93,7 +93,7 @@ export const translations = {
     admission: {
       title: "ভর্তি আবেদন",
       subtitle:
-        "নতুন শিক্ষাবর্ষে ভর্তির জন্য নিচের ফরমটি সঠিক তথ্য দিয়ে পূরণ করুন।",
+        "নতুন শিক্ষাবর্ষে ভর্তির জন্য নিচের ফরমটি সঠিক তথ্য দিয়ে পূরণ করুন।",
 
       // সেকশন হেডার
       personalInfo: "ব্যক্তিগত তথ্য",
@@ -104,6 +104,8 @@ export const translations = {
       // ফিল্ড লেবেল
       studentNameEn: "শিক্ষার্থীর নাম (English)",
       studentNameBn: "শিক্ষার্থীর নাম (বাংলা)",
+      email: "ইমেইল (Confirmation এর জন্য)",
+      studentPhoto: "শিক্ষার্থীর ছবি",
       dob: "জন্ম তারিখ",
       gender: "লিঙ্গ",
       bloodGroup: "রক্তের গ্রুপ",
@@ -111,6 +113,7 @@ export const translations = {
       fatherName: "পিতার নাম",
       motherName: "মাতার নাম",
       guardianPhone: "অভিভাবকের ফোন নম্বর",
+      admissionClass: "ভর্তির ক্লাস",
       department: "ভর্তির বিভাগ",
       previousSchool: "পূর্ববর্তী প্রতিষ্ঠানের নাম",
       presentAddress: "বর্তমান ঠিকানা",
@@ -129,8 +132,11 @@ export const translations = {
 
       // ভ্যালিডেশন ও প্লেসহোল্ডার
       required: "এই তথ্যটি আবশ্যক",
+      invalidEmail: "সঠিক ইমেইল ঠিকানা দিন",
+      invalidPhone: "সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন",
       placeholderNameEn: "Full Name in English",
-      placeholderNameBn: "পূর্ণ নাম বাংলায় লিখুন",
+      placeholderNameBn: "পূর্ণ নাম বাংলায় লিখুন",
+      placeholderEmail: "example@gmail.com",
       placeholderPhone: "০১XXXXXXXXX",
       placeholderSchool: "আগের মাদরাসা বা স্কুলের নাম (যদি থাকে)",
       placeholderAddress: "গ্রাম, ডাকঘর, থানা, জেলা",
@@ -420,6 +426,8 @@ export const translations = {
       // Field Labels
       studentNameEn: "Student's Name (English)",
       studentNameBn: "Student's Name (Bangla)",
+      email: "Email Address (For Confirmation)",
+      studentPhoto: "Student's Photo",
       dob: "Date of Birth",
       gender: "Gender",
       bloodGroup: "Blood Group",
@@ -427,6 +435,7 @@ export const translations = {
       fatherName: "Father's Name",
       motherName: "Mother's Name",
       guardianPhone: "Guardian's Phone Number",
+      admissionClass: "Admission Class",
       department: "Admission Department",
       previousSchool: "Previous Institution Name",
       presentAddress: "Present Address",
@@ -446,8 +455,11 @@ export const translations = {
 
       // Validation & Placeholders
       required: "This field is required",
+      invalidEmail: "Please enter a valid email address",
+      invalidPhone: "Please enter a valid 11-digit phone number",
       placeholderNameEn: "Enter full name in English",
       placeholderNameBn: "Enter full name in Bangla",
+      placeholderEmail: "example@gmail.com",
       placeholderPhone: "01XXXXXXXXX",
       placeholderSchool: "Previous Madrasa or School name (if any)",
       placeholderAddress: "Village, Post Office, Thana, District",

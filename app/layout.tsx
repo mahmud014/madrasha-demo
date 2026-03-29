@@ -1,27 +1,33 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { LanguageProvider } from '@/context/LanguageContext';
-import { AuthProvider } from '@/context/AuthContext'; // AuthProvider ইমপোর্ট করুন
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { Toaster } from 'sonner';
+import type { Metadata } from "next";
+import "./globals.css";
+import { LanguageProvider } from "@/context/LanguageContext";
+import { AuthProvider } from "@/context/AuthContext";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: 'Madrasa Website',
-  description: 'Islamic Education Center',
+  title: "Madrasa Website",
+  description: "Islamic Education Center",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="bn" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <AuthProvider> {/* সবার উপরে AuthProvider দিন */}
+        <AuthProvider>
+          {" "}
+          {/* সবার উপরে AuthProvider দিন */}
           <LanguageProvider>
             <div className="min-h-screen flex flex-col">
               <Navbar />
               <main className="grow">{children}</main>
               <Footer />
-              <Toaster position="top-center" richColors />
+              <Toaster position="top-right" richColors />
             </div>
           </LanguageProvider>
         </AuthProvider>
