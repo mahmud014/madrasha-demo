@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     await dbConnect();
 
     // আইডি দিয়ে ইউজার খোঁজা
-    const user = await User.findOne({ id });
+    const user = await User.findOne({ id: id.trim() });
     if (!user) {
       return NextResponse.json({ message: "ইউজার আইডি সঠিক নয়" }, { status: 404 });
     }
