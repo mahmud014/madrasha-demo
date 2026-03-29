@@ -1,8 +1,33 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models, Document } from "mongoose";
 
-const AdmissionSchema = new Schema(
+// ১. টাইপ-সেফটির জন্য ইন্টারফেস (TypeScript Interface)
+export interface IAdmission extends Document {
+  studentNameEn: string;
+  studentNameBn: string;
+  dob: string;
+  gender: string;
+  bloodGroup?: string;
+  birthRegNo?: string;
+  fatherName: string;
+  motherName: string;
+  guardianPhone: string;
+  department: string;
+  previousSchool?: string;
+  presentAddress: string;
+  permanentAddress: string;
+  studentPhoto?: string;
+  admissionId?: string;
+  admissionDate: Date;
+  status: "pending" | "approved" | "rejected";
+  paymentStatus: "unpaid" | "paid" | "partial";
+  adminNote?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const AdmissionSchema = new Schema<IAdmission>(
   {
-    // --- ব্যক্তিগত তথ্য (ইউজার পূরণ করবে) ---
+    // --- ব্যক্তিগত তথ্য ---
     studentNameEn: { type: String, required: true },
     studentNameBn: { type: String, required: true },
     dob: { type: String, required: true },
@@ -10,49 +35,42 @@ const AdmissionSchema = new Schema(
     bloodGroup: { type: String },
     birthRegNo: { type: String },
 
-    // --- অভিভাবকের তথ্য (ইউজার পূরণ করবে) ---
+    // --- অভিভাবকের তথ্য ---
     fatherName: { type: String, required: true },
     motherName: { type: String, required: true },
     guardianPhone: { type: String, required: true },
 
-    // --- শিক্ষাগত তথ্য (ইউজার পূরণ করবে) ---
+    // --- শিক্ষাগত তথ্য ---
     department: { type: String, required: true },
     previousSchool: { type: String },
 
-    // --- ঠিকানা (ইউজার পূরণ করবে) ---
+    // --- ঠিকানা ---
     presentAddress: { type: String, required: true },
     permanentAddress: { type: String, required: true },
 
-    // --- এডমিন ম্যানেজমেন্ট ফিল্ডস (সিস্টেম বা এডমিন দ্বারা নিয়ন্ত্রিত) ---
+    // --- ছবি (Cloudinary URL সেভ করার জন্য) ---
+    studentPhoto: { type: String },
 
-    // ১. অটো-জেনারেটেড আইডি বা রোল (ইউনিক হতে হবে)
+    // --- এডমিন ম্যানেজমেন্ট ফিল্ডস ---
     admissionId: {
       type: String,
       unique: true,
       sparse: true,
     },
-
-    // ২. ভর্তির তারিখ (ডিফল্ট আজকের তারিখ)
     admissionDate: {
       type: Date,
       default: Date.now,
     },
-
-    // ৩. স্ট্যাটাস (পেন্ডিং ডিফল্ট থাকবে)
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
-
-    // ৪. পেমেন্ট স্ট্যাটাস (ইউজার যখন ফি দিবে তখন এডমিন আপডেট করবে)
     paymentStatus: {
       type: String,
       enum: ["unpaid", "paid", "partial"],
       default: "unpaid",
     },
-
-    // ৫. এডমিন নোট (যদি কোনো বিশেষ মন্তব্য থাকে)
     adminNote: { type: String },
   },
   {
@@ -60,6 +78,8 @@ const AdmissionSchema = new Schema(
   },
 );
 
-const Admission = models.Admission || model("Admission", AdmissionSchema);
+// ২. মডেল এক্সপোর্ট করার সময় জেনেরিক টাইপ ব্যবহার
+const Admission =
+  models.Admission || model<IAdmission>("Admission", AdmissionSchema);
 
 export default Admission;
