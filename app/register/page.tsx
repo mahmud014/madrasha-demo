@@ -10,12 +10,12 @@ import { cn } from '@/lib/utils';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({ 
-    name: '', 
-    email: '', 
-    password: '', 
-    role: 'parent',
-    id: '' 
-  });
+  name: '', 
+  email: '', 
+  password: '', 
+  role: 'student', // 'parent' এর বদলে 'student' দিন
+  id: '' 
+});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // পাসওয়ার্ড দেখানোর স্টেট
   const router = useRouter();
