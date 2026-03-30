@@ -1,3 +1,4 @@
+"use client";
 import { dbConnect } from "@/lib/mongodb";
 import Admission from "@/models/Admission";
 import { NextResponse } from "next/server";
