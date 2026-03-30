@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { db, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from '@/lib/firebase';
 import { useLanguage } from '@/context/LanguageContext';
 import { Download, Plus, Calculator, History } from 'lucide-react';
 import { toast } from 'sonner';
@@ -26,29 +25,40 @@ export default function FinancePage() {
   // টোটাল ক্যালকুলেশন
   const totalAmount = Number(formData.tuitionFee) + Number(formData.examFee) + Number(formData.otherFee);
 
+  // LocalStorage থেকে ডাটা লোড করা (Firebase এর বিকল্প হিসেবে)
   useEffect(() => {
-    const unsub = onSnapshot(
-      query(collection(db, 'payments'), orderBy('createdAt', 'desc')),
-      (s) => setPayments(s.docs.map(d => ({ id: d.id, ...d.data() })))
-    );
-    return () => unsub();
+    const savedData = localStorage.getItem('madrasa_payments');
+    if (savedData) {
+      setPayments(JSON.parse(savedData));
+    }
   }, []);
 
   const handleAddPayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.studentName || totalAmount <= 0) return toast.error("Please fill all fields");
+    if (!formData.studentName || totalAmount <= 0) {
+      return toast.error("অনুগ্রহ করে সব ঘর পূরণ করুন");
+    }
 
     setLoading(true);
     try {
-      await addDoc(collection(db, 'payments'), {
+      // নতুন পেমেন্ট অবজেক্ট তৈরি
+      const newPayment = {
+        id: Date.now().toString(), // ইউনিক আইডি
         ...formData,
         totalAmount,
-        createdAt: serverTimestamp(),
-      });
-      toast.success("Payment Successful!");
+        createdAt: new Date().toISOString(), // টাইমস্ট্যাম্প
+      };
+
+      const updatedPayments = [newPayment, ...payments];
+      setPayments(updatedPayments);
+      
+      // LocalStorage এ সেভ করা
+      localStorage.setItem('madrasa_payments', JSON.stringify(updatedPayments));
+
+      toast.success("পেমেন্ট সফলভাবে সম্পন্ন হয়েছে!");
       setFormData({ studentName: '', studentRoll: '', month: '', tuitionFee: 0, examFee: 0, otherFee: 0 });
     } catch (error) {
-      toast.error("Error saving payment");
+      toast.error("সেভ করতে সমস্যা হয়েছে");
     } finally {
       setLoading(false);
     }
@@ -58,11 +68,20 @@ export default function FinancePage() {
     const element = document.getElementById(`invoice-${payment.id}`);
     if (!element) return;
     
-    const canvas = await html2canvas(element);
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF();
-    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
-    pdf.save(`Invoice_${payment.studentRoll}_${payment.month}.pdf`);
+    try {
+      const canvas = await html2canvas(element, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Invoice_${payment.studentRoll}_${payment.month}.pdf`);
+      toast.success("ইনভয়েস ডাউনলোড হচ্ছে...");
+    } catch (error) {
+      toast.error("PDF তৈরি করতে সমস্যা হয়েছে");
+    }
   };
 
   return (
@@ -80,18 +99,18 @@ export default function FinancePage() {
           <form onSubmit={handleAddPayment} className="space-y-4">
             <input 
               type="text" placeholder="ছাত্রের নাম" 
-              className="w-full p-3 rounded-xl border bg-accent/5"
+              className="w-full p-3 rounded-xl border bg-accent/5 focus:outline-primary"
               value={formData.studentName}
               onChange={(e) => setFormData({...formData, studentName: e.target.value})}
             />
             <input 
               type="text" placeholder="রোল নম্বর" 
-              className="w-full p-3 rounded-xl border bg-accent/5"
+              className="w-full p-3 rounded-xl border bg-accent/5 focus:outline-primary"
               value={formData.studentRoll}
               onChange={(e) => setFormData({...formData, studentRoll: e.target.value})}
             />
             <select 
-              className="w-full p-3 rounded-xl border bg-accent/5"
+              className="w-full p-3 rounded-xl border bg-accent/5 focus:outline-primary"
               value={formData.month}
               onChange={(e) => setFormData({...formData, month: e.target.value})}
             >
@@ -100,8 +119,16 @@ export default function FinancePage() {
             </select>
             
             <div className="grid grid-cols-2 gap-2">
-              <input type="number" placeholder="টিউশন ফি" className="p-3 rounded-xl border" onChange={(e)=>setFormData({...formData, tuitionFee: Number(e.target.value)})}/>
-              <input type="number" placeholder="পরীক্ষা ফি" className="p-3 rounded-xl border" onChange={(e)=>setFormData({...formData, examFee: Number(e.target.value)})}/>
+              <input 
+                type="number" placeholder="টিউশন ফি" className="p-3 rounded-xl border focus:outline-primary" 
+                value={formData.tuitionFee || ''}
+                onChange={(e)=>setFormData({...formData, tuitionFee: Number(e.target.value)})}
+              />
+              <input 
+                type="number" placeholder="পরীক্ষা ফি" className="p-3 rounded-xl border focus:outline-primary" 
+                value={formData.examFee || ''}
+                onChange={(e)=>setFormData({...formData, examFee: Number(e.target.value)})}
+              />
             </div>
 
             <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20">
@@ -111,7 +138,7 @@ export default function FinancePage() {
 
             <button 
               disabled={loading}
-              className="w-full bg-secondary text-white py-3 rounded-xl font-bold shadow-lg hover:bg-secondary/90 transition-all"
+              className="w-full bg-secondary text-white py-3 rounded-xl font-bold shadow-lg hover:bg-secondary/90 transition-all disabled:opacity-50"
             >
               {loading ? "প্রসেসিং..." : "পেমেন্ট নিশ্চিত করুন"}
             </button>
@@ -136,56 +163,69 @@ export default function FinancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-accent">
-                {payments.map((p) => (
-                  <tr key={p.id} className="hover:bg-accent/5 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-bold">{p.studentName}</div>
-                      <div className="text-xs text-ink/50">Roll: {p.studentRoll}</div>
-                    </td>
-                    <td className="px-6 py-4 text-sm">{p.month}</td>
-                    <td className="px-6 py-4 font-bold text-primary">৳ {p.totalAmount}</td>
-                    <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => downloadInvoice(p)}
-                        className="p-2 text-secondary hover:bg-secondary/10 rounded-lg transition-all"
-                      >
-                        <Download className="w-5 h-5" />
-                      </button>
-
-                      {/* ইনভয়েস টেমপ্লেট (এটি স্ক্রিনের বাইরে থাকবে বা হিডেন থাকবে) */}
-                      <div className="hidden">
-                        <div id={`invoice-${p.id}`} className="p-10 bg-white text-black w-[800px]">
-                          <h1 className="text-2xl font-bold text-center border-b pb-4 mb-4">Payment Receipt</h1>
-                          <div className="flex justify-between mb-8">
-                            <div>
-                              <p><strong>Name:</strong> {p.studentName}</p>
-                              <p><strong>Roll:</strong> {p.studentRoll}</p>
-                            </div>
-                            <div className="text-right">
-                              <p><strong>Month:</strong> {p.month}</p>
-                              <p><strong>Date:</strong> {p.createdAt?.toDate().toLocaleDateString()}</p>
-                            </div>
-                          </div>
-                          <table className="w-full border-collapse border border-gray-200">
-                            <thead>
-                              <tr className="bg-gray-100">
-                                <th className="border p-2">Description</th>
-                                <th className="border p-2">Amount</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr><td className="border p-2">Tuition Fee</td><td className="border p-2">৳ {p.tuitionFee}</td></tr>
-                              <tr><td className="border p-2">Exam Fee</td><td className="border p-2">৳ {p.examFee}</td></tr>
-                              <tr><td className="border p-2">Other Fee</td><td className="border p-2">৳ {p.otherFee}</td></tr>
-                              <tr className="font-bold bg-gray-50"><td className="border p-2">Total Paid</td><td className="border p-2 text-primary">৳ {p.totalAmount}</td></tr>
-                            </tbody>
-                          </table>
-                          <p className="mt-10 text-center text-xs text-gray-400 font-mono italic">Generated by Student Management System</p>
-                        </div>
-                      </div>
-                    </td>
+                {payments.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-10 text-ink/40">কোনো পেমেন্ট রেকর্ড পাওয়া যায়নি।</td>
                   </tr>
-                ))}
+                ) : (
+                  payments.map((p) => (
+                    <tr key={p.id} className="hover:bg-accent/5 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-bold">{p.studentName}</div>
+                        <div className="text-xs text-ink/50">Roll: {p.studentRoll}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm">{p.month}</td>
+                      <td className="px-6 py-4 font-bold text-primary">৳ {p.totalAmount}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button 
+                          onClick={() => downloadInvoice(p)}
+                          className="p-2 text-secondary hover:bg-secondary/10 rounded-lg transition-all"
+                        >
+                          <Download className="w-5 h-5" />
+                        </button>
+
+                        {/* ইনভয়েস টেমপ্লেট (হিডেন) */}
+                        <div className="fixed left-[-9999px] top-0">
+                          <div id={`invoice-${p.id}`} className="p-10 bg-white text-black w-[800px] font-sans">
+                            <h1 className="text-3xl font-bold text-center border-b-2 border-primary pb-4 mb-6 text-primary">Payment Receipt</h1>
+                            <div className="flex justify-between mb-8 text-lg">
+                              <div>
+                                <p><strong>Student Name:</strong> {p.studentName}</p>
+                                <p><strong>Roll Number:</strong> {p.studentRoll}</p>
+                              </div>
+                              <div className="text-right">
+                                <p><strong>Billing Month:</strong> {p.month}</p>
+                                <p><strong>Payment Date:</strong> {new Date(p.createdAt).toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                            <table className="w-full border-collapse border border-gray-300">
+                              <thead>
+                                <tr className="bg-gray-100">
+                                  <th className="border border-gray-300 p-4 text-left">Description</th>
+                                  <th className="border border-gray-300 p-4 text-right">Amount</th>
+                                </tr>
+                              </thead>
+                              <tbody className="text-lg">
+                                <tr><td className="border border-gray-300 p-4">Tuition Fee</td><td className="border border-gray-300 p-4 text-right">৳ {p.tuitionFee}</td></tr>
+                                <tr><td className="border border-gray-300 p-4">Exam Fee</td><td className="border border-gray-300 p-4 text-right">৳ {p.examFee}</td></tr>
+                                <tr><td className="border border-gray-300 p-4">Other Fee</td><td className="border border-gray-300 p-4 text-right">৳ {p.otherFee}</td></tr>
+                                <tr className="font-bold bg-primary/5 text-primary text-xl">
+                                  <td className="border border-gray-300 p-4">Total Paid</td>
+                                  <td className="border border-gray-300 p-4 text-right">৳ {p.totalAmount}</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <div className="mt-12 flex justify-between">
+                              <div className="text-center w-40 border-t border-black pt-2">Accountant</div>
+                              <div className="text-center w-40 border-t border-black pt-2">Principal</div>
+                            </div>
+                            <p className="mt-10 text-center text-sm text-gray-400 font-mono italic">Automatically generated by Madrasa Management System</p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

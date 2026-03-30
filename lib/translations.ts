@@ -224,6 +224,7 @@ export const translations = {
       notFound: "কোনো নোটিশ নেই।",
     },
     admin: {
+      navUsers: "ব্যবহারকারী",
       loading: "লোড হচ্ছে...",
       loginTitle: "অ্যাডমিন লগইন",
       loginSubtitle: "অ্যাডমিন প্যানেলে প্রবেশ করুন।",
@@ -310,9 +311,11 @@ export const translations = {
       tableEventDate: "তারিখ",
       tableEventTime: "সময়",
       tableEventTag: "ট্যাগ/ইমোজি",
+      profile: "প্রোফাইল",
     },
 
     student: {
+      profile: "প্রোফাইল",
       welcome: "স্বাগতম",
       attendanceSummary: "হাজিরা সংক্ষেপ",
       dueFees: "বকেয়া ফি",
@@ -549,6 +552,7 @@ export const translations = {
       notFound: "No notices found.",
     },
     student: {
+      profile: "Profile",
       welcome: "Welcome",
       attendanceSummary: "Attendance Summary",
       dueFees: "Due Fees",
@@ -559,6 +563,7 @@ export const translations = {
     },
     admin: {
       loading: "Loading...",
+      navUsers: "Users",
       loginTitle: "Admin Login",
       loginSubtitle: "Enter the admin panel.",
       loginEmail: "Email",

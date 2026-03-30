@@ -26,7 +26,7 @@ export default function StudentSidebar() {
     { href: '/student/results', label: t('nav.results'), icon: FileText },
     { href: '/student/notices', label: t('admin.navNotices'), icon: Bell },
     { href: '/student/leave-request', label: t('admin.markAttendance'), icon: ClipboardList }, // ছুটির জন্য
-    { href: '/student/profile', label: t('admission.studentName'), icon: UserCircle },
+    { href: '/student/profile', label: t('student.profile'), icon: UserCircle },
   ];
 
   return (
