@@ -29,16 +29,6 @@ interface IPrayerTimings {
   [key: string]: string;
 }
 
-// ২৪ ঘণ্টা থেকে ১২ ঘণ্টায় রূপান্তর ---
-const formatTime12 = (time24: string | undefined) => {
-  if (!time24) return "--:--";
-  const [hours, minutes] = time24.split(":");
-  let h = parseInt(hours);
-  const ampm = h >= 12 ? "PM" : "AM";
-  h = h % 12 || 12;
-  return `${h}:${minutes} ${ampm}`;
-};
-
 const staticSettings = {
   madrasaNameBn: "আল-হিকমাহ ইসলামিয়া মাদ্রাসা",
   madrasaNameEn: "Al-Hikmah Islamic Madrasa",
@@ -157,7 +147,7 @@ export default function Home() {
       nameBn: "ফজর",
       nameEn: "Fajr",
       time: prayerTimes?.Fajr,
-      iqamah: "5:25 AM",
+      iqamah: "5:15 AM",
     },
     {
       nameBn: "যোহর",
@@ -170,7 +160,7 @@ export default function Home() {
       nameBn: "মাগরিব",
       nameEn: "Maghrib",
       time: prayerTimes?.Maghrib,
-      iqamah: "6:20 PM",
+      iqamah: "3:45 AM",
     },
     {
       nameBn: "এশা",
@@ -257,7 +247,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Prayer Times Section */}
+      {/* Prayer Times Section (New Premium Design) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -277,7 +267,7 @@ export default function Home() {
                 </span>
               </div>
             </div>
-            <div className="px-8 py-3 bg-slate-50 rounded-2xl border border-slate-100 text-slate-600 font-bold shadow-sm">
+            <div className="px-8 py-3 bg-primary/5 rounded-2xl border border-primary/10 text-primary font-bold shadow-sm">
               {new Date().toLocaleDateString(
                 language === "bn" ? "bn-BD" : "en-US",
                 { weekday: "long", day: "numeric", month: "long" },
@@ -288,6 +278,9 @@ export default function Home() {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 space-y-4">
               <Loader2 className="w-12 h-12 animate-spin text-emerald-600" />
+              <p className="text-sm text-ink/40 font-bold uppercase tracking-widest">
+                Fetching Live Timings...
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -296,6 +289,7 @@ export default function Home() {
                   key={idx}
                   className="bg-white p-8 rounded-[2rem] text-center space-y-4 border border-gray-100 shadow-sm hover:shadow-md transition-all group relative"
                 >
+                  {/* ইমেজ অনুযায়ী ডটেড ক্লক আইকন */}
                   <div className="w-16 h-16 border-2 border-dashed border-emerald-600/50 rounded-full flex items-center justify-center mx-auto text-emerald-700 group-hover:border-solid group-hover:bg-emerald-50 transition-all">
                     <Clock className="w-8 h-8" strokeWidth={1.5} />
                   </div>
@@ -304,9 +298,8 @@ export default function Home() {
                     <h3 className="text-xl font-bold text-gray-900 tracking-tight">
                       {language === "bn" ? prayer.nameBn : prayer.nameEn}
                     </h3>
-                    {/* --- এখানে formatTime12 ব্যবহার করা হয়েছে ১২ ঘণ্টা করার জন্য --- */}
                     <p className="text-sm font-bold text-gray-400 uppercase tracking-tighter">
-                      {formatTime12(prayer.time)}
+                      {prayer.time || "--:--"}
                     </p>
                   </div>
 

@@ -118,7 +118,7 @@ export default function DashboardPage() {
               <option>২০২৫ শিক্ষাবর্ষ</option>
             </select>
           </div>
-          <div className="h-[320px] w-full min-h-[320px]">
+          <div className="h-[320px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={performanceData}>
                 <defs>
@@ -168,7 +168,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-bold text-slate-800 mb-6">
             বিভাগীয় বণ্টন
           </h2>
-          <div className="h-[250px] w-full min-h-[250px]">
+          <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
