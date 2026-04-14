@@ -1,15 +1,15 @@
+import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import Result from "@/models/Result";
-import { NextResponse } from "next/server";
 
 // ১. নির্দিষ্ট রেজাল্ট ডিলিট করার জন্য DELETE মেথড
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     await dbConnect();
-    const { id } = params;
 
     // MongoDB ID দিয়ে রেজাল্ট খুঁজে ডিলিট করা
     const deletedResult = await Result.findByIdAndDelete(id);
@@ -36,13 +36,13 @@ export async function DELETE(
 
 // ২. রেজাল্ট এডিট বা আপডেট করার জন্য PATCH মেথড
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
+    const body = await request.json();
     await dbConnect();
-    const { id } = params;
-    const body = await req.json();
 
     // রেজাল্ট আপডেট করা
     const updatedResult = await Result.findByIdAndUpdate(
@@ -66,6 +66,34 @@ export async function PATCH(
     console.error("PATCH Error:", error);
     return NextResponse.json(
       { success: false, error: "সার্ভারে সমস্যা হয়েছে" },
+      { status: 500 },
+    );
+  }
+}
+
+// ৩. নির্দিষ্ট রেজাল্ট দেখার জন্য GET মেথড (ঐচ্ছিক)
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+    await dbConnect();
+
+    const result = await Result.findById(id);
+
+    if (!result) {
+      return NextResponse.json(
+        { success: false, message: "রেজাল্টটি খুঁজে পাওয়া যায়নি" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({ success: true, data: result }, { status: 200 });
+  } catch (error) {
+    console.error("GET Error:", error);
+    return NextResponse.json(
+      { success: false, error: "রেজাল্ট লোড করতে সমস্যা হয়েছে" },
       { status: 500 },
     );
   }
