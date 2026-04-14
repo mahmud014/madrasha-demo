@@ -58,10 +58,7 @@ export default function StudentIdCardsPage() {
       const element = printRef.current;
       if (!element) return;
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-      });
+      const canvas = await html2canvas(element);
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({
