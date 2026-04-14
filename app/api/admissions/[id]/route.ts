@@ -1,15 +1,15 @@
+import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import Admission from "@/models/Admission";
-import { NextResponse } from "next/server";
 
 // ১. নির্দিষ্ট একটি আবেদন ডিলিট করার মেথড (DELETE)
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     await dbConnect();
-    const { id } = params;
 
     const deletedAdmission = await Admission.findByIdAndDelete(id);
 
@@ -34,19 +34,18 @@ export async function DELETE(
 }
 
 // ২. নির্দিষ্ট একটি আবেদনের স্ট্যাটাস আপডেট করার মেথড (PATCH)
-// এটি আপনার অ্যাডমিন প্যানেলে 'Approve' বা 'Reject' করার কাজে লাগবে
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
+    const body = await request.json();
     await dbConnect();
-    const { id } = params;
-    const body = await req.json();
 
     const updatedAdmission = await Admission.findByIdAndUpdate(
       id,
-      { $set: body }, // বডিতে যা পাঠানো হবে (যেমন: status: "approved") তা আপডেট হবে
+      { $set: body },
       { new: true },
     );
 
@@ -69,6 +68,37 @@ export async function PATCH(
     console.error("Admission PATCH Error:", error);
     return NextResponse.json(
       { success: false, error: "আপডেট করতে সমস্যা হয়েছে" },
+      { status: 500 },
+    );
+  }
+}
+
+// ৩. নির্দিষ্ট একটি আবেদন দেখার মেথড (GET) - ঐচ্ছিক
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+    await dbConnect();
+
+    const admission = await Admission.findById(id);
+
+    if (!admission) {
+      return NextResponse.json(
+        { success: false, error: "আবেদনটি খুঁজে পাওয়া যায়নি" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json(
+      { success: true, data: admission },
+      { status: 200 },
+    );
+  } catch (error: unknown) {
+    console.error("Admission GET Error:", error);
+    return NextResponse.json(
+      { success: false, error: "আবেদন লোড করতে সমস্যা হয়েছে" },
       { status: 500 },
     );
   }
