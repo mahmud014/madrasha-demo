@@ -13,19 +13,30 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
+// টাইপ ডিফাইন করুন
+interface Department {
+  title: string;
+  icon: React.ElementType;
+  desc: string;
+  features: string[];
+  color: string;
+  bgColor: string;
+  category: string;
+}
+
 export default function Departments() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // ১. 'departments' অ্যারেকে useMemo-র ভেতরে নিয়ে আসা হয়েছে যাতে Referential Integrity ঠিক থাকে
-  const departments = useMemo(
-    () => [
+  // ডিপার্টমেন্ট ডাটা - ট্রান্সলেশন থেকে নেওয়া
+  const departments: Department[] = useMemo(() => {
+    return [
       {
         title: t("departments.dept1Title"),
         icon: Mic2,
         desc: t("departments.dept1Desc"),
-        features: t("departments.dept1Features") as string[],
+        features: t("departments.dept1Features") as unknown as string[],
         color: "text-blue-600",
         bgColor: "bg-blue-50",
         category: "Islamic",
@@ -34,7 +45,7 @@ export default function Departments() {
         title: t("departments.dept2Title"),
         icon: BookOpen,
         desc: t("departments.dept2Desc"),
-        features: t("departments.dept2Features") as string[],
+        features: t("departments.dept2Features") as unknown as string[],
         color: "text-emerald-600",
         bgColor: "bg-emerald-50",
         category: "General",
@@ -43,7 +54,7 @@ export default function Departments() {
         title: t("departments.dept3Title"),
         icon: GraduationCap,
         desc: t("departments.dept3Desc"),
-        features: t("departments.dept3Features") as string[],
+        features: t("departments.dept3Features") as unknown as string[],
         color: "text-amber-600",
         bgColor: "bg-amber-50",
         category: "Higher",
@@ -52,23 +63,25 @@ export default function Departments() {
         title: t("departments.dept4Title"),
         icon: Languages,
         desc: t("departments.dept4Desc"),
-        features: t("departments.dept4Features") as string[],
+        features: t("departments.dept4Features") as unknown as string[],
         color: "text-purple-600",
         bgColor: "bg-purple-50",
         category: "Language",
       },
-    ],
-    [t],
-  ); // ল্যাঙ্গুয়েজ চেঞ্জ হলে এটি আপডেট হবে
+    ];
+  }, [t]);
 
   const categories = ["All", "Islamic", "General", "Higher", "Language"];
 
-  // ২. ফিল্টারিং লজিক এখন স্টেবল
+  // ফিল্টারিং লজিক
   const filteredDepts = useMemo(() => {
     return departments.filter((dept) => {
       const matchesSearch =
         dept.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dept.desc.toLowerCase().includes(searchQuery.toLowerCase());
+        dept.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        dept.features.some((feature) =>
+          feature.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
       const matchesCategory =
         selectedCategory === "All" || dept.category === selectedCategory;
       return matchesSearch && matchesCategory;
@@ -77,6 +90,7 @@ export default function Departments() {
 
   return (
     <div className="pb-20 bg-gray-50/50 min-h-screen">
+      {/* হিরো সেকশন */}
       <section className="bg-primary text-white py-24 text-center relative overflow-hidden">
         <div
           className="absolute inset-0 z-0 bg-cover bg-center opacity-20 transition-transform duration-1000 hover:scale-105"
@@ -104,13 +118,17 @@ export default function Departments() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 -mt-10 relative z-20">
-        {/* --- Search & Filter Bar --- */}
+        {/* সার্চ ও ফিল্টার বার */}
         <div className="bg-white rounded-3xl p-4 shadow-xl border border-accent/20 mb-10 flex flex-col md:flex-row gap-4 items-center">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search departments..."
+              placeholder={
+                language === "bn"
+                  ? "বিভাগ অনুসন্ধান..."
+                  : "Search departments..."
+              }
               className="w-full pl-12 pr-4 py-3 rounded-2xl border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-gray-50/50 text-ink"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -143,14 +161,14 @@ export default function Departments() {
           </div>
         </div>
 
-        {/* --- Departments Grid --- */}
+        {/* ডিপার্টমেন্ট গ্রিড */}
         <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <AnimatePresence mode="popLayout">
             {filteredDepts.length > 0 ? (
-              filteredDepts.map((dept) => (
+              filteredDepts.map((dept, index) => (
                 <motion.div
                   layout
-                  key={dept.title}
+                  key={index}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
@@ -170,16 +188,20 @@ export default function Departments() {
                       <p className="text-gray-500 leading-relaxed">
                         {dept.desc}
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {dept.features.map((feature, fIndex) => (
-                          <span
-                            key={fIndex}
-                            className="px-3 py-1.5 bg-gray-100 text-gray-600 text-[10px] md:text-xs font-bold rounded-xl group-hover:bg-primary/5 group-hover:text-primary transition-colors"
-                          >
-                            {feature}
-                          </span>
-                        ))}
-                      </div>
+                      {dept.features &&
+                        Array.isArray(dept.features) &&
+                        dept.features.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {dept.features.map((feature, fIndex) => (
+                              <span
+                                key={fIndex}
+                                className="px-3 py-1.5 bg-gray-100 text-gray-600 text-[10px] md:text-xs font-bold rounded-xl group-hover:bg-primary/5 group-hover:text-primary transition-colors"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                     </div>
                   </div>
                 </motion.div>
@@ -192,7 +214,9 @@ export default function Departments() {
               >
                 <div className="bg-white rounded-3xl p-10 shadow-sm border border-dashed border-gray-200 inline-block">
                   <p className="text-gray-400 text-lg">
-                    No departments found matching your search.
+                    {language === "bn"
+                      ? "আপনার অনুসন্ধানে কোনো বিভাগ পাওয়া যায়নি।"
+                      : "No departments found matching your search."}
                   </p>
                   <button
                     onClick={() => {
@@ -201,7 +225,7 @@ export default function Departments() {
                     }}
                     className="mt-4 text-primary font-bold hover:underline"
                   >
-                    Clear all filters
+                    {language === "bn" ? "সব ফিল্টার清除" : "Clear all filters"}
                   </button>
                 </div>
               </motion.div>

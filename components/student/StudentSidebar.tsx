@@ -1,73 +1,225 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useLanguage } from '@/context/LanguageContext';
-import { 
-  LayoutDashboard, 
-  CalendarCheck, 
-  Wallet, 
-  FileText, 
-  Bell, 
-  UserCircle, 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
+import { useState, useEffect } from "react";
+import {
+  LayoutDashboard,
+  CalendarCheck,
+  Wallet,
+  FileText,
+  Bell,
+  UserCircle,
   LogOut,
-  ClipboardList
-} from 'lucide-react';
+  ClipboardList,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { toast } from "sonner";
 
 export default function StudentSidebar() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false); // কনফার্মেশন ডায়ালগের জন্য
 
-  // স্টুডেন্ট প্যানেলের জন্য মেনু আইটেম
+  useEffect(() => {
+    const checkScreen = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsCollapsed(true);
+      } else {
+        const saved = localStorage.getItem("sidebarCollapsed");
+        if (saved !== null) {
+          setIsCollapsed(saved === "true");
+        }
+      }
+    };
+
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
+  const toggleSidebar = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    if (!isMobile) {
+      localStorage.setItem("sidebarCollapsed", String(newState));
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+
+      document.cookie =
+        "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+      document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+
+      toast.success(
+        language === "bn"
+          ? "সফলভাবে লগআউট হয়েছে!"
+          : "Logged out successfully!",
+        {
+          duration: 2000,
+          position: "top-right",
+        },
+      );
+
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1000);
+    } catch (error) {
+      toast.error(
+        language === "bn" ? "লগআউট করতে সমস্যা হয়েছে" : "Failed to logout",
+        {
+          duration: 3000,
+          position: "top-right",
+        },
+      );
+    }
+  };
+
+  const confirmLogout = () => {
+    setShowConfirm(true);
+  };
+
+  const cancelLogout = () => {
+    setShowConfirm(false);
+  };
+
   const navItems = [
-    { href: '/student/', label: t('nav.dashboard'), icon: LayoutDashboard },
-    { href: '/student/attendance', label: t('admin.navAttendance'), icon: CalendarCheck },
-    { href: '/student/finance', label: t('admin.navFinance'), icon: Wallet },
-    { href: '/student/results', label: t('nav.results'), icon: FileText },
-    { href: '/student/notices', label: t('admin.navNotices'), icon: Bell },
-    { href: '/student/leave-request', label: t('admin.markAttendance'), icon: ClipboardList }, // ছুটির জন্য
-    { href: '/student/profile', label: t('student.profile'), icon: UserCircle },
+    { href: "/student/", label: t("nav.dashboard"), icon: LayoutDashboard },
+    {
+      href: "/student/attendance",
+      label: t("nav.Attendance"),
+      icon: CalendarCheck,
+    },
+    { href: "/student/finance", label: t("nav.Finance"), icon: Wallet },
+    { href: "/student/results", label: t("nav.results"), icon: FileText },
+    { href: "/student/notices", label: t("nav.Notices"), icon: Bell },
+    {
+      href: "/student/leave-request",
+      label: t("nav.LeaveRequest"),
+      icon: ClipboardList,
+    },
+    { href: "/student/profile", label: t("student.profile"), icon: UserCircle },
   ];
 
+  const sidebarWidth = isCollapsed ? "w-20" : "w-64";
+
   return (
-    <div className="w-64 bg-indigo-900 text-white min-h-screen p-6 flex flex-col justify-between">
-      <div className="space-y-6">
-        {/* ব্র্যান্ড লোগো বা নাম */}
-        <div className="pb-6 border-b border-indigo-800">
-          <h1 className="text-xl font-bold text-center">Student Portal</h1>
+    <>
+      <aside
+        className={`
+          ${sidebarWidth}
+          bg-primary text-primary-content
+          shadow-xl
+          flex flex-col
+          transition-all duration-300 ease-in-out
+          ${isMobile ? "fixed left-0 top-0 h-full z-30" : "sticky top-0 h-screen"}
+        `}
+      >
+        {/* হেডার */}
+        <div className="drawer-header p-4 border-b border-primary-focus">
+          <div className="flex items-center justify-between">
+            {!isCollapsed && (
+              <div className="overflow-hidden whitespace-nowrap">
+                <h1 className="text-xl font-bold">Student</h1>
+                <p className="text-xs text-primary-content/70 mt-1">Portal</p>
+              </div>
+            )}
+            <button
+              onClick={toggleSidebar}
+              className={`btn btn-ghost btn-sm ${isCollapsed ? "mx-auto" : ""}`}
+            >
+              {isCollapsed ? (
+                <ChevronRight size={18} />
+              ) : (
+                <ChevronLeft size={18} />
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* নেভিগেশন লিঙ্ক */}
-        <nav className="space-y-2">
+        {/* মেনু */}
+        <ul className="menu menu-sm flex-1 p-4 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
-            
+
             return (
-              <Link key={item.href} href={item.href}>
-                <div
-                  className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-white text-indigo-900 shadow-lg'
-                      : 'hover:bg-white/10 text-indigo-100'
-                  }`}
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`
+                    flex items-center gap-3
+                    ${isCollapsed ? "justify-center" : ""}
+                    ${isActive ? "active" : ""}
+                  `}
                 >
                   <Icon size={20} />
-                  <span className="font-medium">{item.label}</span>
-                </div>
-              </Link>
+                  {!isCollapsed && <span>{item.label}</span>}
+                </Link>
+              </li>
             );
           })}
-        </nav>
-      </div>
+        </ul>
 
-      {/* লগআউট বা নিচের অংশ */}
-      <div className="pt-6 border-t border-indigo-800">
-        <button className="flex items-center gap-3 p-3 w-full rounded-xl hover:bg-red-500/20 text-red-200 transition-colors">
-          <LogOut size={20} />
-          <span>{t('admin.logout')}</span>
-        </button>
-      </div>
-    </div>
+        {/* লগআউট বাটন */}
+        <div className="p-4 border-t border-primary-focus">
+          <button
+            onClick={confirmLogout}
+            className={`
+              btn btn-outline btn-error btn-sm w-full
+              ${isCollapsed ? "btn-square" : ""}
+            `}
+          >
+            <LogOut size={18} />
+            {!isCollapsed && <span>{t("admin.logout")}</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* কনফার্মেশন ডায়ালগ */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl shadow-2xl w-80 p-6 mx-4">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-2">
+                {language === "bn" ? "লগআউট নিশ্চিত করুন" : "Confirm Logout"}
+              </h3>
+              <p className="text-sm text-gray-500 mb-6">
+                {language === "bn"
+                  ? "আপনি কি নিশ্চিত যে আপনি লগআউট করতে চান?"
+                  : "Are you sure you want to logout?"}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelLogout}
+                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                >
+                  {language === "bn" ? "বাতিল" : "Cancel"}
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
+                >
+                  {language === "bn" ? "লগআউট" : "Logout"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -1,59 +1,76 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
-// ইউজারের টাইপ নির্ধারণ
 interface User {
   name: string;
-  role: 'admin' | 'parent';
+  role: "admin" | "student" | "teacher"; // parent এর পরিবর্তে teacher
+  id: string;
 }
 
 interface AuthContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   loading: boolean;
+  login: (id: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    }
+    return null;
+  });
 
-  // পেজ লোড হওয়ার সময় চেক করবে ইউজার লগইন করা আছে কি না
-  useEffect(() => {
-    const checkUserSession = async () => {
-      try {
-        // এখানে আপনার সেশন চেক করার API কল হবে
-        const res = await fetch('/api/auth/me'); 
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-        }
-      } catch (error) {
-        console.error("Auth check failed", error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [loading, setLoading] = useState(false);
 
-    checkUserSession();
-  }, []);
-
-  const logout = async () => {
+  const login = async (id: string, password: string) => {
+    setLoading(true);
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      setUser(null);
-      window.location.href = '/login';
-    } catch (error) {
-      console.error("Logout failed", error);
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, password }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.message);
+      }
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+      setUser(data.user);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "লগইন ব্যর্থ হয়েছে";
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const logout = () => {
+    // localStorage ক্লিয়ার
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    // ✅ কুকি ক্লিয়ার করুন (Middleware এর জন্য)
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+
+    setUser(null);
+    window.location.href = "/login";
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -61,8 +78,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 };
