@@ -22,6 +22,15 @@ import {
   CheckCircle,
   GraduationCap,
   Download,
+  Calendar,
+  Clock,
+  Eye,
+  UserPlus,
+  Bell,
+  FileText,
+  ArrowUpRight,
+  ArrowDownRight,
+  MoreHorizontal,
 } from "lucide-react";
 
 // Types
@@ -30,14 +39,17 @@ interface StatCardProps {
   value: string;
   icon: React.ReactNode;
   trend: string;
-  trendType?: "positive" | "negative" | "neutral";
+  trendType?: "up" | "down";
+  iconBg: string;
+  iconColor: string;
 }
 
 interface ActivityItemProps {
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   desc: string;
   time: string;
+  bgColor: string;
 }
 
 // Dummy Data
@@ -51,275 +63,368 @@ const performanceData = [
 ];
 
 const deptData = [
-  { name: "নুরানি", value: 150, color: "#10b981" },
-  { name: "হিফজ", value: 120, color: "#3b82f6" },
-  { name: "কিতাব", value: 180, color: "#f59e0b" },
+  { name: "নুরানি", value: 150, color: "#1a4d2e" },
+  { name: "হিফজ", value: 120, color: "#ff9f29" },
+  { name: "কিতাব", value: 180, color: "#10b981" },
+];
+
+const recentActivities = [
+  {
+    icon: <UserPlus size={18} />,
+    title: "নতুন ভর্তি",
+    desc: "৫টি নতুন আবেদন জমা পড়েছে",
+    time: "১০ মিনিট আগে",
+    bgColor: "bg-blue-100 text-blue-600",
+  },
+  {
+    icon: <Bell size={18} />,
+    title: "নোটিশ প্রকাশিত",
+    desc: "রমজানের ছুটির নোটিশ জারি",
+    time: "২ ঘণ্টা আগে",
+    bgColor: "bg-orange-100 text-orange-600",
+  },
+  {
+    icon: <FileText size={18} />,
+    title: "পরীক্ষার ফলাফল",
+    desc: "বার্ষিক পরীক্ষার ফলাফল প্রকাশ",
+    time: "৫ ঘণ্টা আগে",
+    bgColor: "bg-green-100 text-green-600",
+  },
+  {
+    icon: <Eye size={18} />,
+    title: "প্রোফাইল ভিজিট",
+    desc: "অভিভাবক থেকে ১২টি ভিজিট",
+    time: "গতকাল",
+    bgColor: "bg-purple-100 text-purple-600",
+  },
 ];
 
 export default function DashboardPage() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+
+  // পরিসংখ্যান কার্ডের ডাটা
+  const statsData = [
+    {
+      title: language === "bn" ? "মোট শিক্ষার্থী" : "Total Students",
+      value: "৪৫০",
+      icon: <Users size={22} />,
+      trend: "+১২ জন",
+      trendType: "up" as const,
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+    },
+    {
+      title: language === "bn" ? "উপস্থিতি" : "Attendance",
+      value: "৯২%",
+      icon: <CheckCircle size={22} />,
+      trend: "৮ জন অনুপস্থিত",
+      trendType: "down" as const,
+      iconBg: "bg-emerald-100",
+      iconColor: "text-emerald-600",
+    },
+    {
+      title: language === "bn" ? "মোট সংগ্রহ" : "Revenue",
+      value: "৳৮৫,০০০",
+      icon: <Wallet size={22} />,
+      trend: "+১০%",
+      trendType: "up" as const,
+      iconBg: "bg-orange-100",
+      iconColor: "text-orange-600",
+    },
+    {
+      title: language === "bn" ? "নতুন আবেদন" : "New Applications",
+      value: "১২",
+      icon: <GraduationCap size={22} />,
+      trend: language === "bn" ? "এই সপ্তাহে" : "This week",
+      trendType: "up" as const,
+      iconBg: "bg-purple-100",
+      iconColor: "text-purple-600",
+    },
+  ];
 
   return (
-    <div className="space-y-8 pb-10 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6 pb-10">
+      {/* হেডার সেকশন */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">
             {t("nav.dashboard")}
           </h1>
-          <p className="text-slate-500 mt-1">
-            মাদ্রাসার আজকের সার্বিক পরিস্থিতি একনজরে দেখুন
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            {language === "bn"
+              ? "মাদ্রাসার আজকের সার্বিক পরিস্থিতি একনজরে দেখুন"
+              : "View overall madrasa statistics at a glance"}
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-white border border-slate-200 px-5 py-2.5 rounded-2xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:shadow-sm transition-all">
-          <Download size={18} className="text-primary" /> রিপোর্ট ডাউনলোড
+        <button className="btn btn-outline btn-sm gap-2">
+          <Download size={16} />
+          {language === "bn" ? "রিপোর্ট ডাউনলোড" : "Download Report"}
         </button>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title={t("home.stats.students")}
-          value="৪৫০"
-          icon={<Users size={24} className="text-blue-500" />}
-          trend="+১২ জন নতুন"
-        />
-        <StatCard
-          title="আজকের উপস্থিতি"
-          value="৯২%"
-          icon={<CheckCircle size={24} className="text-emerald-500" />}
-          trend="৮ জন অনুপস্থিত"
-          trendType="negative"
-        />
-        <StatCard
-          title="মোট সংগ্রহ"
-          value="৳৮৫,০০০"
-          icon={<Wallet size={24} className="text-orange-500" />}
-          trend="১০% বৃদ্ধি"
-        />
-        <StatCard
-          title="নতুন আবেদন"
-          value="১২"
-          icon={<GraduationCap size={24} className="text-purple-500" />}
-          trend="বিগত ৭ দিন"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Performance Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <TrendingUp size={20} className="text-emerald-500" /> একাডেমিক
-              ইমপ্রুভমেন্ট
-            </h2>
-            <select className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 outline-none font-medium text-slate-600">
-              <option>২০২৬ শিক্ষাবর্ষ</option>
-              <option>২০২৫ শিক্ষাবর্ষ</option>
-            </select>
-          </div>
-          <div className="h-[320px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={performanceData}>
-                <defs>
-                  <linearGradient id="colorMarks" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="#f1f5f9"
-                />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#94a3b8", fontSize: 12 }}
-                  dy={10}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "#94a3b8", fontSize: 12 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "16px",
-                    border: "none",
-                    boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)",
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="marks"
-                  stroke="#10b981"
-                  strokeWidth={3}
-                  fill="url(#colorMarks)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Distribution Chart */}
-        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-          <h2 className="text-lg font-bold text-slate-800 mb-6">
-            বিভাগীয় বণ্টন
-          </h2>
-          <div className="h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={deptData}
-                  innerRadius={70}
-                  outerRadius={90}
-                  paddingAngle={8}
-                  dataKey="value"
+      {/* স্ট্যাটিস্টিকস কার্ড গ্রিড */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {statsData.map((stat, index) => (
+          <div
+            key={index}
+            className="card bg-white shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
+          >
+            <div className="card-body p-4 sm:p-5">
+              <div className="flex items-center justify-between">
+                <div
+                  className={`p-2.5 rounded-xl ${stat.iconBg} ${stat.iconColor}`}
                 >
-                  {deptData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.color}
-                      stroke="none"
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-6 space-y-3">
-            {deptData.map((dept) => (
-              <div
-                key={dept.name}
-                className="flex justify-between items-center p-2 rounded-xl hover:bg-slate-50 transition-colors"
-              >
-                <span className="flex items-center gap-3 text-sm font-medium text-slate-600">
-                  <span
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: dept.color }}
-                  ></span>
-                  {dept.name}
-                </span>
-                <span className="font-bold text-slate-800">
-                  {dept.value} জন
-                </span>
+                  {stat.icon}
+                </div>
+                <div
+                  className={`flex items-center gap-1 text-xs font-medium ${stat.trendType === "up" ? "text-green-600" : "text-red-600"}`}
+                >
+                  {stat.trendType === "up" ? (
+                    <ArrowUpRight size={14} />
+                  ) : (
+                    <ArrowDownRight size={14} />
+                  )}
+                  {stat.trend}
+                </div>
               </div>
-            ))}
+              <div className="mt-3">
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                  {stat.title}
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1">
+                  {stat.value}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* চার্ট সেকশন */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* পারফরম্যান্স চার্ট */}
+        <div className="lg:col-span-2 card bg-white shadow-sm border border-gray-100">
+          <div className="card-body p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <h2 className="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2">
+                <TrendingUp size={18} className="text-primary" />
+                {language === "bn"
+                  ? "একাডেমিক ইমপ্রুভমেন্ট"
+                  : "Academic Improvement"}
+              </h2>
+              <select className="select select-sm select-bordered w-full sm:w-32">
+                <option>
+                  {language === "bn" ? "২০২৬ শিক্ষাবর্ষ" : "2026 Academic Year"}
+                </option>
+                <option>
+                  {language === "bn" ? "২০২৫ শিক্ষাবর্ষ" : "2025 Academic Year"}
+                </option>
+              </select>
+            </div>
+            <div className="h-56 sm:h-64 md:h-72 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={performanceData}>
+                  <defs>
+                    <linearGradient id="colorMarks" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="5%"
+                        stopColor="#1a4d2e"
+                        stopOpacity={0.15}
+                      />
+                      <stop offset="95%" stopColor="#1a4d2e" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#f1f5f9"
+                  />
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#94a3b8", fontSize: 10 }}
+                    dy={10}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#94a3b8", fontSize: 10 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "none",
+                      boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)",
+                      fontSize: "12px",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="marks"
+                    stroke="#1a4d2e"
+                    strokeWidth={2.5}
+                    fill="url(#colorMarks)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* পাই চার্ট - বিভাগীয় বণ্টন */}
+        <div className="card bg-white shadow-sm border border-gray-100">
+          <div className="card-body p-4 sm:p-6">
+            <h2 className="text-base sm:text-lg font-bold text-gray-800 mb-3">
+              {language === "bn" ? "বিভাগীয় বণ্টন" : "Department Distribution"}
+            </h2>
+            <div className="h-48 sm:h-52 md:h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={deptData}
+                    innerRadius={50}
+                    outerRadius={70}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {deptData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        stroke="none"
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-3 space-y-2">
+              {deptData.map((dept) => (
+                <div
+                  key={dept.name}
+                  className="flex justify-between items-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <span className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-600">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full"
+                      style={{ backgroundColor: dept.color }}
+                    ></span>
+                    {dept.name}
+                  </span>
+                  <span className="font-bold text-gray-800 text-sm">
+                    {dept.value}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Activity Feed */}
-        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-          <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <Megaphone size={20} className="text-primary" /> সাম্প্রতিক
-            কার্যক্রম
-          </h2>
-          <div className="space-y-2">
-            <ActivityItem
-              icon="📩"
-              title={t("admin.navAdmissions")}
-              desc="৫টি নতুন ভর্তির আবেদন জমা পড়েছে"
-              time="১০ মিনিট আগে"
-            />
-            <ActivityItem
-              icon="📢"
-              title={t("admin.navNotices")}
-              desc="রমজানের ছুটির নোটিশ প্রকাশিত হয়েছে"
-              time="২ ঘণ্টা আগে"
-            />
-            <ActivityItem
-              icon="💬"
-              title={t("admin.navMessages")}
-              desc="অভিভাবকের পক্ষ থেকে ৩টি নতুন বার্তা"
-              time="৫ ঘণ্টা আগে"
-            />
+      {/* সাম্প্রতিক কার্যক্রম ও দ্রুত অ্যাকশন */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* সাম্প্রতিক কার্যক্রম */}
+        <div className="card bg-white shadow-sm border border-gray-100">
+          <div className="card-body p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2">
+                <Megaphone size={18} className="text-primary" />
+                {language === "bn"
+                  ? "সাম্প্রতিক কার্যক্রম"
+                  : "Recent Activities"}
+              </h2>
+              <button className="text-xs text-primary font-medium hover:underline">
+                {language === "bn" ? "সব দেখুন" : "View All"}
+              </button>
+            </div>
+            <div className="space-y-2">
+              {recentActivities.map((activity, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-all cursor-pointer"
+                >
+                  <div
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center ${activity.bgColor}`}
+                  >
+                    {activity.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-gray-800 text-sm leading-tight">
+                      {activity.title}
+                    </h4>
+                    <p className="text-xs text-gray-500 truncate">
+                      {activity.desc}
+                    </p>
+                  </div>
+                  <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
+                    {activity.time}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-          <h2 className="text-lg font-bold text-slate-800 mb-6">
-            কুইক অ্যাকশন
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            <QuickActionBtn
-              icon={<Users className="text-blue-500" />}
-              label="উপস্থিতি নিন"
-            />
-            <QuickActionBtn
-              icon={<Wallet className="text-orange-500" />}
-              label="ফি সংগ্রহ"
-            />
+        {/* দ্রুত অ্যাকশন */}
+        <div className="card bg-white shadow-sm border border-gray-100">
+          <div className="card-body p-4 sm:p-6">
+            <h2 className="text-base sm:text-lg font-bold text-gray-800 mb-4">
+              {language === "bn" ? "কুইক অ্যাকশন" : "Quick Actions"}
+            </h2>
+            <div className="grid grid-cols-2 gap-3">
+              <button className="btn bg-gray-50 hover:bg-primary hover:text-white border-none normal-case h-auto py-4 flex flex-col items-center gap-2 transition-all duration-300">
+                <Users
+                  size={20}
+                  className="text-primary group-hover:text-white"
+                />
+                <span className="text-xs font-medium">
+                  {language === "bn" ? "উপস্থিতি নিন" : "Take Attendance"}
+                </span>
+              </button>
+              <button className="btn bg-gray-50 hover:bg-primary hover:text-white border-none normal-case h-auto py-4 flex flex-col items-center gap-2 transition-all duration-300">
+                <Wallet
+                  size={20}
+                  className="text-orange-500 group-hover:text-white"
+                />
+                <span className="text-xs font-medium">
+                  {language === "bn" ? "ফি সংগ্রহ" : "Collect Fee"}
+                </span>
+              </button>
+              <button className="btn bg-gray-50 hover:bg-primary hover:text-white border-none normal-case h-auto py-4 flex flex-col items-center gap-2 transition-all duration-300">
+                <UserPlus
+                  size={20}
+                  className="text-blue-500 group-hover:text-white"
+                />
+                <span className="text-xs font-medium">
+                  {language === "bn" ? "নতুন ভর্তি" : "New Admission"}
+                </span>
+              </button>
+              <button className="btn bg-gray-50 hover:bg-primary hover:text-white border-none normal-case h-auto py-4 flex flex-col items-center gap-2 transition-all duration-300">
+                <FileText
+                  size={20}
+                  className="text-purple-500 group-hover:text-white"
+                />
+                <span className="text-xs font-medium">
+                  {language === "bn" ? "নোটিশ দিন" : "Post Notice"}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
 
-// Fixed Components with Types
-function StatCard({
-  title,
-  value,
-  icon,
-  trend,
-  trendType = "positive",
-}: StatCardProps) {
-  return (
-    <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-all group overflow-hidden">
-      <div className="p-3 bg-slate-50 w-fit rounded-2xl group-hover:scale-110 transition-transform">
-        {icon}
-      </div>
-      <div className="mt-5">
-        <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          {title}
-        </h2>
-        <p className="text-3xl font-black text-slate-800 mt-1">{value}</p>
-        <p
-          className={`text-[11px] font-bold mt-2 flex items-center gap-1 ${trendType === "positive" ? "text-emerald-500" : "text-rose-500"}`}
-        >
-          {trend}
-        </p>
+      {/* ফুটার তথ্য */}
+      <div className="card bg-primary/5 border-none">
+        <div className="card-body p-3 sm:p-4 text-center">
+          <p className="text-xs text-gray-500">
+            {language === "bn"
+              ? "শেষ আপডেট: আজ, ১০:৩০ AM"
+              : "Last updated: Today, 10:30 AM"}
+          </p>
+        </div>
       </div>
     </div>
-  );
-}
-
-function ActivityItem({ icon, title, desc, time }: ActivityItemProps) {
-  return (
-    <div className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-all cursor-pointer border border-transparent hover:border-slate-100">
-      <div className="text-2xl bg-white shadow-sm w-12 h-12 flex items-center justify-center rounded-xl">
-        {icon}
-      </div>
-      <div className="flex-1">
-        <h4 className="font-bold text-slate-800 text-sm leading-none">
-          {title}
-        </h4>
-        <p className="text-xs text-slate-500 mt-1">{desc}</p>
-      </div>
-      <span className="text-[10px] text-slate-400 font-medium">{time}</span>
-    </div>
-  );
-}
-
-function QuickActionBtn({
-  icon,
-  label,
-}: {
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <button className="p-5 bg-slate-50 hover:bg-primary hover:text-white rounded-[1.5rem] transition-all text-left group border border-slate-100">
-      <div className="bg-white w-10 h-10 rounded-xl flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform">
-        {icon}
-      </div>
-      <span className="font-bold text-sm block">{label}</span>
-    </button>
   );
 }

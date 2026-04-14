@@ -7,10 +7,10 @@ import {
   History,
   Award,
   CheckCircle2,
-  Users, // নতুন আইকন
-  BookOpen, // নতুন আইকন
-  ShieldCheck, // নতুন আইকন
-  School, // নতুন আইকন
+  Users,
+  BookOpen,
+  ShieldCheck,
+  School,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import Image from "next/image";
@@ -22,25 +22,87 @@ interface BoardMember {
   bio?: string;
 }
 
-type BoardMemberArrayFunc = (
-  key: string,
-  options: { returnObjects: boolean },
-) => BoardMember[];
-
 export default function About() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
-  const boardMembers =
-    (t as unknown as BoardMemberArrayFunc)("about.boardMembers", {
-      returnObjects: true,
-    }) || [];
+  // ✅ সঠিকভাবে boardMembers ডাটা নেওয়া
+  const boardMembers: BoardMember[] = (() => {
+    try {
+      // ট্রান্সলেশন থেকে ডাটা নেওয়ার চেষ্টা
+      const members = t("about.boardMembers");
+      if (Array.isArray(members) && members.length > 0) {
+        return members;
+      }
+    } catch (error) {
+      console.error("Error loading board members:", error);
+    }
+
+    // ফ্যালব্যাক ডাটা (যদি ট্রান্সলেশন না পায়)
+    if (language === "bn") {
+      return [
+        { name: "মাওলানা আব্দুল করিম", role: "সভাপতি" },
+        { name: "হাফেজ মোহাম্মদ আলী", role: "সহ-সভাপতি" },
+        { name: "মাওলানা ইব্রাহিম খলিল", role: "সাধারণ সম্পাদক" },
+      ];
+    } else {
+      return [
+        { name: "Maulana Abdul Karim", role: "President" },
+        { name: "Hafez Mohammad Ali", role: "Vice President" },
+        { name: "Maulana Ibrahim Khalil", role: "General Secretary" },
+      ];
+    }
+  })();
 
   // Statistics Data
   const stats = [
-    { label: "Students", value: "1200+", icon: <Users className="w-6 h-6" /> },
-    { label: "Hafiz", value: "450+", icon: <Award className="w-6 h-6" /> },
-    { label: "Teachers", value: "40+", icon: <BookOpen className="w-6 h-6" /> },
-    { label: "Founded", value: "1995", icon: <History className="w-6 h-6" /> },
+    {
+      label: language === "bn" ? "শিক্ষার্থী" : "Students",
+      value: "1200+",
+      icon: <Users className="w-6 h-6" />,
+    },
+    {
+      label: language === "bn" ? "হাফেজ" : "Hafiz",
+      value: "450+",
+      icon: <Award className="w-6 h-6" />,
+    },
+    {
+      label: language === "bn" ? "শিক্ষক" : "Teachers",
+      value: "40+",
+      icon: <BookOpen className="w-6 h-6" />,
+    },
+    {
+      label: language === "bn" ? "প্রতিষ্ঠিত" : "Founded",
+      value: "1995",
+      icon: <History className="w-6 h-6" />,
+    },
+  ];
+
+  // Core Values
+  const coreValues = [
+    {
+      title: language === "bn" ? "ইসলামিক সততা" : "Islamic Integrity",
+      desc:
+        language === "bn"
+          ? "বিশুদ্ধ সুন্নাহ ও নৈতিক শ্রেষ্ঠত্বের ভিত্তিতে চরিত্র গঠন।"
+          : "Building character based on pure Sunnah and moral excellence.",
+      icon: <ShieldCheck className="w-10 h-10" />,
+    },
+    {
+      title: language === "bn" ? "একাডেমিক শ্রেষ্ঠত্ব" : "Academic Excellence",
+      desc:
+        language === "bn"
+          ? "ধর্মীয় ও সাধারণ শিক্ষার সমন্বয়ে উন্নত শিক্ষা প্রদান।"
+          : "Providing top-tier religious and general education side by side.",
+      icon: <School className="w-10 h-10" />,
+    },
+    {
+      title: language === "bn" ? "সমাজ সেবা" : "Community Service",
+      desc:
+        language === "bn"
+          ? "শিক্ষার্থীদের সমাজের নেতৃত্ব ও সেবার জন্য প্রস্তুত করা।"
+          : "Preparing students to lead and serve the society with compassion.",
+      icon: <Users className="w-10 h-10" />,
+    },
   ];
 
   return (
@@ -75,7 +137,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* --- Statistics Section (New) --- */}
+      {/* --- Statistics Section --- */}
       <section className="relative z-20 -mt-12 max-w-7xl mx-auto px-4">
         <div className="bg-white rounded-[2.5rem] shadow-xl p-8 md:p-12 grid grid-cols-2 md:grid-cols-4 gap-8 border border-accent/10">
           {stats.map((stat, i) => (
@@ -140,30 +202,16 @@ export default function About() {
         </div>
       </section>
 
-      {/* --- Core Values (New) --- */}
+      {/* --- Core Values --- */}
       <section className="max-w-7xl mx-auto px-4 py-24">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-secondary">Our Core Values</h2>
+          <h2 className="text-4xl font-bold text-secondary">
+            {language === "bn" ? "আমাদের মূল মূল্যবোধ" : "Our Core Values"}
+          </h2>
           <div className="w-20 h-1.5 bg-primary mx-auto mt-4 rounded-full" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              title: "Islamic Integrity",
-              desc: "Building character based on pure Sunnah and moral excellence.",
-              icon: <ShieldCheck className="w-10 h-10" />,
-            },
-            {
-              title: "Academic Excellence",
-              desc: "Providing top-tier religious and general education side by side.",
-              icon: <School className="w-10 h-10" />,
-            },
-            {
-              title: "Community Service",
-              desc: "Preparing students to lead and serve the society with compassion.",
-              icon: <Users className="w-10 h-10" />,
-            },
-          ].map((value, i) => (
+          {coreValues.map((value, i) => (
             <motion.div
               key={i}
               whileHover={{ y: -10 }}
@@ -182,7 +230,7 @@ export default function About() {
       </section>
 
       {/* --- History Section --- */}
-      <section className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+      <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex flex-col lg:flex-row gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -193,7 +241,7 @@ export default function About() {
             <div className="inline-flex items-center space-x-2 text-primary bg-primary/5 px-4 py-2 rounded-full font-bold">
               <History className="w-5 h-5" />
               <span className="text-sm uppercase tracking-wider">
-                Our Legacy
+                {language === "bn" ? "আমাদের ইতিহাস" : "Our Legacy"}
               </span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-secondary leading-tight">
@@ -204,11 +252,17 @@ export default function About() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-secondary font-medium">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span>Quality Education</span>
+                  <span>
+                    {language === "bn"
+                      ? "মানসম্মত শিক্ষা"
+                      : "Quality Education"}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Award className="w-5 h-5 text-primary" />
-                  <span>Islamic Values</span>
+                  <span>
+                    {language === "bn" ? "ইসলামিক মূল্যবোধ" : "Islamic Values"}
+                  </span>
                 </div>
               </div>
               <p>{t("about.historyDesc2")}</p>
@@ -247,14 +301,11 @@ export default function About() {
               >
                 <div className="bg-gray-50 rounded-[2.5rem] p-8 text-center space-y-6 transition-all group-hover:bg-white group-hover:shadow-2xl border border-transparent group-hover:border-primary/10">
                   <div className="relative w-40 h-40 mx-auto">
-                    <Image
-                      src={
-                        member.image || `https://i.pravatar.cc/150?u=${index}`
-                      }
-                      alt={member.name}
-                      fill
-                      className="rounded-full object-cover border-8 border-white shadow-lg"
-                    />
+                    <div className="w-40 h-40 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      <span className="text-4xl font-bold text-primary">
+                        {member.name.charAt(0)}
+                      </span>
+                    </div>
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-secondary group-hover:text-primary transition-colors">

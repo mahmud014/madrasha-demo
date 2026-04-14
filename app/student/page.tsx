@@ -32,12 +32,9 @@ const performanceData = [
   { name: "Final", score: 85 },
 ];
 
-// ✅ সব ডাটা সরাসরি এখানে জেনারেট করুন - কোন useEffect নেই!
-// সার্ভার এবং ক্লায়েন্টে একই ডাটা থাকবে (হাইড্রেশন মিসম্যাচ হবে না)
 const generateStaticAttendanceData = (): AttendanceDay[] => {
   return Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
-    // প্রতি ৩য় দিন অনুপস্থিত, বাকি সব দিন উপস্থিত (স্ট্যাটিক প্যাটার্ন)
     status: (i + 1) % 3 === 0 ? "absent" : "present",
   }));
 };
@@ -45,10 +42,8 @@ const generateStaticAttendanceData = (): AttendanceDay[] => {
 const AttendanceDashboard = () => {
   const { language, t } = useLanguage();
 
-  // ✅ সরাসরি স্টেটে ডাটা সেট করুন - Lazy initialization
   const [days] = React.useState<AttendanceDay[]>(generateStaticAttendanceData);
 
-  // ✅ উপস্থিতির হার সরাসরি ক্যালকুলেট করুন - রেন্ডার টাইমে
   const attendancePercentage = React.useMemo(() => {
     const presentCount = days.filter((d) => d.status === "present").length;
     return Math.round((presentCount / days.length) * 100);
@@ -61,70 +56,84 @@ const AttendanceDashboard = () => {
       : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen font-sans text-gray-800">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4 rtl:space-x-reverse">
-            <div className="p-3 bg-green-100 text-green-600 rounded-lg">
-              <CheckCircle size={24} />
+    <div className="p-3 sm:p-4 md:p-6 bg-gray-50 min-h-screen font-sans text-gray-800">
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+        {/* Summary Cards - রেসপন্সিভ গ্রিড */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          {/* কার্ড ১ - উপস্থিতি */}
+          <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-3 sm:space-x-4 rtl:space-x-reverse">
+            <div className="p-2 sm:p-3 bg-green-100 text-green-600 rounded-lg">
+              <CheckCircle size={20} className="sm:w-6 sm:h-6" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-gray-500">
                 {t("student.attendanceSummary") || "Attendance"}
               </p>
-              <h3 className="text-xl font-bold">{attendancePercentage}%</h3>
+              <h3 className="text-lg sm:text-xl font-bold">
+                {attendancePercentage}%
+              </h3>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4 rtl:space-x-reverse">
-            <div className="p-3 bg-red-100 text-red-600 rounded-lg">
-              <CreditCard size={24} />
+
+          {/* কার্ড ২ - বকেয়া ফি */}
+          <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-3 sm:space-x-4 rtl:space-x-reverse">
+            <div className="p-2 sm:p-3 bg-red-100 text-red-600 rounded-lg">
+              <CreditCard size={20} className="sm:w-6 sm:h-6" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-gray-500">
                 {t("student.dueFees") || "Due Fee"}
               </p>
-              <h3 className="text-xl font-bold">৳ 2500</h3>
+              <h3 className="text-lg sm:text-xl font-bold">৳ 2500</h3>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4 rtl:space-x-reverse">
-            <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
-              <Clock size={24} />
+
+          {/* কার্ড ৩ - পরবর্তী ক্লাস */}
+          <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-3 sm:space-x-4 rtl:space-x-reverse">
+            <div className="p-2 sm:p-3 bg-blue-100 text-blue-600 rounded-lg">
+              <Clock size={20} className="sm:w-6 sm:h-6" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-gray-500">
                 {t("student.nextClass") || "Next Class"}
               </p>
-              <h3 className="text-lg font-bold">10:30 AM</h3>
+              <h3 className="text-base sm:text-lg font-bold">10:30 AM</h3>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* চার্ট এবং ক্যালেন্ডার সেকশন */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Attendance Calendar */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
-              <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
-                <CalendarIcon size={20} className="text-indigo-500" />
-                {t("student.attendanceCalendar") || "Attendance Calendar"}
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2">
+              <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2 text-gray-700">
+                <CalendarIcon
+                  size={18}
+                  className="sm:w-5 sm:h-5 text-indigo-500"
+                />
+                <span className="text-sm sm:text-base">
+                  {t("student.attendanceCalendar") || "Attendance Calendar"}
+                </span>
               </h3>
-              <div className="flex gap-3 text-[10px] md:text-xs">
+              <div className="flex gap-2 sm:gap-3 text-[8px] sm:text-[10px] md:text-xs">
                 <span className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>{" "}
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full"></div>{" "}
                   {t("student.present") || "Present"}
                 </span>
                 <span className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>{" "}
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full"></div>{" "}
                   {t("student.absent") || "Absent"}
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-1 md:gap-2 text-center">
+            {/* ক্যালেন্ডার গ্রিড - মোবাইলের জন্য ছোট */}
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2 text-center">
               {weekDays.map((day, index) => (
                 <div
                   key={`${day}-${index}`}
-                  className="text-gray-400 text-xs font-bold py-2"
+                  className="text-gray-400 text-[8px] sm:text-xs font-bold py-1 sm:py-2"
                 >
                   {day}
                 </div>
@@ -132,12 +141,15 @@ const AttendanceDashboard = () => {
               {days.map((item) => (
                 <div
                   key={item.day}
-                  className={`py-2 md:py-3 rounded-lg text-xs md:text-sm font-medium transition-all
+                  className={`
+                    py-1 sm:py-2 md:py-3 rounded-md sm:rounded-lg 
+                    text-[10px] sm:text-xs md:text-sm font-medium transition-all
                     ${
                       item.status === "present"
                         ? "bg-green-50 text-green-700 border border-green-100"
                         : "bg-red-50 text-red-700 border border-red-100"
-                    }`}
+                    }
+                  `}
                 >
                   {item.day}
                 </div>
@@ -146,11 +158,11 @@ const AttendanceDashboard = () => {
           </div>
 
           {/* Performance Tracker */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold mb-6 text-gray-700">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-gray-700">
               {t("student.performanceTracker") || "Performance Tracker"}
             </h3>
-            <div className="h-64 w-full">
+            <div className="h-48 sm:h-56 md:h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={performanceData}>
                   <defs>
@@ -168,25 +180,26 @@ const AttendanceDashboard = () => {
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 10 }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 10 }}
                   />
                   <Tooltip
                     contentStyle={{
                       borderRadius: "12px",
                       border: "none",
                       boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                      fontSize: "12px",
                     }}
                   />
                   <Area
                     type="monotone"
                     dataKey="score"
                     stroke="#6366f1"
-                    strokeWidth={3}
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#colorScore)"
                   />
