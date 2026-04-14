@@ -139,7 +139,13 @@ export default function FinancePage() {
     if (!element) return;
 
     try {
-      const canvas = await html2canvas(element, { scale: 2 });
+      const canvas = await html2canvas(element, {
+        scale: window.devicePixelRatio || 2,
+        backgroundColor: "#ffffff",
+        logging: false,
+        useCORS: true,
+        allowTaint: false,
+      });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const imgProps = pdf.getImageProperties(imgData);
