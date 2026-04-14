@@ -20,7 +20,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  X,
   ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";

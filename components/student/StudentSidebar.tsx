@@ -118,7 +118,7 @@ export default function StudentSidebar() {
       <aside
         className={`
           ${sidebarWidth}
-          bg-primary text-primary-content
+          bg-primary text-white
           shadow-xl
           flex flex-col
           transition-all duration-300 ease-in-out
@@ -130,8 +130,8 @@ export default function StudentSidebar() {
           <div className="flex items-center justify-between">
             {!isCollapsed && (
               <div className="overflow-hidden whitespace-nowrap">
-                <h1 className="text-xl font-bold">Student</h1>
-                <p className="text-xs text-primary-content/70 mt-1">Portal</p>
+                <h1 className="text-lg font-bold">Student</h1>
+                <p className="text-xs text-primary-content/70">Portal</p>
               </div>
             )}
             <button
@@ -148,7 +148,7 @@ export default function StudentSidebar() {
         </div>
 
         {/* মেনু */}
-        <ul className="menu menu-sm flex-1 p-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto py-4">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -158,18 +158,23 @@ export default function StudentSidebar() {
                 <Link
                   href={item.href}
                   className={`
-                    flex items-center gap-3
+                    flex items-center gap-3 mx-2 my-1 px-3 py-2.5 rounded-lg
+                    transition-all duration-200 cursor-pointer
                     ${isCollapsed ? "justify-center" : ""}
-                    ${isActive ? "active" : ""}
+                    ${
+                      isActive
+                        ? "bg-white/20 text-white"
+                        : "hover:bg-white/10 text-white/80"
+                    }
                   `}
                 >
-                  <Icon size={20} />
+                  <Icon size={18} />
                   {!isCollapsed && <span>{item.label}</span>}
                 </Link>
               </li>
             );
           })}
-        </ul>
+        </nav>
 
         {/* লগআউট বাটন */}
         <div className="p-4 border-t border-primary-focus">
