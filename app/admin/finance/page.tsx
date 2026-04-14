@@ -140,7 +140,6 @@ export default function FinancePage() {
 
     try {
       const canvas = await html2canvas(element, {
-        scale: window.devicePixelRatio || 2,
         backgroundColor: "#ffffff",
         logging: false,
         useCORS: true,
