@@ -17,6 +17,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext"; // 👈 AuthContext import করুন
 
 // টাইপ ডেফিনেশন
 type AttendanceStatus = "present" | "absent";
@@ -41,6 +42,7 @@ const generateStaticAttendanceData = (): AttendanceDay[] => {
 
 const AttendanceDashboard = () => {
   const { language, t } = useLanguage();
+  const { user, loading } = useAuth(); // 👈 useAuth থেকে user নিন
 
   const [days] = React.useState<AttendanceDay[]>(generateStaticAttendanceData);
 
@@ -49,16 +51,42 @@ const AttendanceDashboard = () => {
     return Math.round((presentCount / days.length) * 100);
   }, [days]);
 
-  // Language dependent week days
   const weekDays =
     language === "bn"
       ? ["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহস্পতি", "শুক্র", "শনি"]
       : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+  // লোডিং স্টেট
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // রোল চেক
+  if (!user || (user.role !== "student" && user.role !== "parent")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
+          <p className="text-red-500 text-lg">⛔ অ্যাক্সেস নিষিদ্ধ!</p>
+          <p className="text-gray-700">আপনার রোল: {user?.role || "N/A"}</p>
+          <p className="text-gray-500 text-sm mt-2">
+            শুধু student বা parent রোল অনুমোদিত
+          </p>
+          <a href="/login" className="inline-block mt-4 text-primary underline">
+            লগইন পেজে যান
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-3 sm:p-4 md:p-6 bg-gray-50 min-h-screen font-sans text-gray-800">
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
-        {/* Summary Cards - রেসপন্সিভ গ্রিড */}
+        {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {/* কার্ড ১ - উপস্থিতি */}
           <div className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-3 sm:space-x-4 rtl:space-x-reverse">
@@ -128,7 +156,6 @@ const AttendanceDashboard = () => {
               </div>
             </div>
 
-            {/* ক্যালেন্ডার গ্রিড - মোবাইলের জন্য ছোট */}
             <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2 text-center">
               {weekDays.map((day, index) => (
                 <div

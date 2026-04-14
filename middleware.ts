@@ -5,6 +5,24 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // ✅ API রাউট সবসময় allow করুন (লগইন API এর জন্য)
+  if (pathname.startsWith("/api/")) {
+    // লগইন এবং রেজিস্টার API সবসময় allow
+    if (pathname === "/api/auth/login" || pathname === "/api/auth/register") {
+      return NextResponse.next();
+    }
+
+    // অন্যান্য API রাউটের জন্য টোকেন চেক
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { error: "Unauthorized", message: "Please login first" },
+        { status: 401 },
+      );
+    }
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get("token")?.value;
   const role = request.cookies.get("role")?.value;
   const isLoggedIn = !!token;
@@ -22,13 +40,11 @@ export function middleware(request: NextRequest) {
   ];
   const privateRoutes = ["/student", "/teacher", "/admin", "/dashboard"];
 
-  // ✅ publicRoutes চেক যোগ করুন
   const isPublicRoute = publicRoutes.includes(pathname);
   const isPrivateRoute = privateRoutes.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
-  // পাবলিক রাউটে লগইন চেকের দরকার নেই
   if (isPublicRoute) {
     return NextResponse.next();
   }
@@ -55,7 +71,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (pathname.startsWith("/student") && role !== "student") {
+  if (
+    pathname.startsWith("/student") &&
+    role !== "student" &&
+    role !== "parent"
+  ) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -63,5 +83,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

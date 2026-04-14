@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState } from "react";
 interface User {
   name: string;
   email: string;
-  role: "admin" | "student" | "teacher"; // parent এর পরিবর্তে teacher
+  role: "admin" | "student" | "teacher" | "parent";
   id: string;
   image?: string;
 }

@@ -10,13 +10,13 @@ const UserSchema = new Schema(
     id: { type: String, required: true, unique: true },
     role: {
       type: String,
-      enum: ["admin", "student", "parent"],
+      enum: ["admin", "student", "teacher", "parent"],
       default: "student",
     },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const User = models.User || model("User", UserSchema, "registration");
