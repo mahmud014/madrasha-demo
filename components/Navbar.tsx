@@ -17,7 +17,7 @@ import {
   Lock,
   Globe,
   LayoutDashboard,
-  User,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,9 +25,20 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 
+interface NavItem {
+  name: string;
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
+  hasDropdown?: boolean;
+  subItems?: { name: string; path: string }[];
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
+  const [activeDropdown, setActiveDropdown] = React.useState<string | null>(
+    null,
+  );
   const pathname = usePathname();
   const { language, setLanguage, t } = useLanguage();
   const { user } = useAuth();
@@ -36,7 +47,7 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
-  const navItems = React.useMemo(
+  const navItems: NavItem[] = React.useMemo(
     () => [
       { name: t("nav.home"), path: "/", icon: Home },
       { name: t("nav.about"), path: "/about", icon: Info },
@@ -52,13 +63,19 @@ export default function Navbar() {
 
   const toggleLanguage = () => setLanguage(language === "bn" ? "en" : "bn");
 
+  const toggleDropdown = (name: string) => {
+    setActiveDropdown(activeDropdown === name ? null : name);
+  };
+
   const dashboardLink = React.useMemo(() => {
     if (!user) return "/login";
     return user.role === "admin" ? "/admin/dashboard" : "/student";
   }, [user]);
 
   const dashboardLabel = React.useMemo(() => {
-    if (!user) return t("nav.dashboard");
+    if (!user) {
+      return language === "bn" ? "লগইন" : "Login";
+    }
     return user.role === "admin"
       ? language === "bn"
         ? "অ্যাডমিন"
@@ -66,9 +83,12 @@ export default function Navbar() {
       : language === "bn"
         ? "শিক্ষার্থী"
         : "Student";
-  }, [user, language, t]);
+  }, [user, language]);
 
-  const closeMobileMenu = () => setIsOpen(false);
+  const closeMobileMenu = () => {
+    setIsOpen(false);
+    setActiveDropdown(null);
+  };
 
   if (!mounted) {
     return (
@@ -91,7 +111,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-accent/20 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-50 bg-white/80 backdrop-blur-md">
         <div className="flex justify-between h-16 lg:h-20">
           {/* লোগো সেকশন */}
           <div className="flex items-center">
@@ -181,26 +201,30 @@ export default function Navbar() {
                   "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center space-x-2 border",
                   user
                     ? "bg-secondary border-secondary text-white shadow-md hover:opacity-90"
-                    : "bg-primary/5 border-primary/20 text-primary hover:bg-primary/10",
+                    : "bg-primary text-white border-primary hover:bg-primary/90 shadow-md",
                 )}
               >
-                <LayoutDashboard className="w-4 h-4" />
+                {user ? (
+                  <LayoutDashboard className="w-4 h-4" />
+                ) : (
+                  <Lock className="w-4 h-4" />
+                )}
                 <span>{dashboardLabel}</span>
               </Link>
             </div>
           </div>
 
-          {/* মোবাইল মেনু বাটন */}
+          {/* মোবাইল মেনু বাটন গ্রুপ */}
           <div className="lg:hidden flex items-center space-x-2">
             <button
               onClick={toggleLanguage}
-              className="text-[10px] font-bold bg-slate-100 px-2 py-1.5 rounded-lg"
+              className="text-[10px] font-bold bg-slate-100 px-2 py-1.5 rounded-lg border border-slate-200 text-slate-700"
             >
               {language === "bn" ? "EN" : "বাং"}
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-slate-600 p-1.5 hover:bg-slate-100 rounded-lg transition-colors"
+              className="text-slate-600 p-1.5 hover:bg-slate-100 rounded-lg transition-colors relative z-50"
             >
               {isOpen ? (
                 <X className="w-6 h-6" />
@@ -212,51 +236,130 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* মোবাইল মেনু - ছোট সাইজ */}
+      {/* মোবাইল ভিউ - উপর থেকে আসা টপ ড্রপডাউন মেনু */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="lg:hidden bg-white border-t border-slate-100 absolute w-1/2 shadow-xl max-h-[calc(100vh-64px)] overflow-y-auto"
-          >
-            <div className="px-3 py-3 space-y-1">
-              {navItems.map((item) => {
-                const isActive = pathname === item.path;
-                const Icon = item.icon;
+          <>
+            {/* ব্যাকড্রপ ওভারলে */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeMobileMenu}
+              className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-30"
+            />
 
-                return (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    onClick={closeMobileMenu}
-                    className={cn(
-                      "flex px-3 py-2.5 rounded-lg text-sm font-medium items-center space-x-3 transition-all",
-                      isActive
-                        ? "text-primary bg-primary/5"
-                        : "text-slate-600 hover:bg-slate-50",
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{item.name}</span>
-                  </Link>
-                );
-              })}
+            {/* উপর থেকে নিচে নামা মেনু বডি */}
+            <motion.div
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ type: "keyframes", damping: 30, stiffness: 300 }}
+              className="lg:hidden fixed inset-x-0 top-0 bg-white z-40 shadow-xl border-b border-slate-100 pt-16 lg:pt-20 flex flex-col max-h-[85vh]"
+            >
+              {/* স্ক্রোলযোগ্য মেনু কন্টেন্ট সেকশন */}
+              <div className="overflow-y-auto px-5 py-5 space-y-1 bg-white border-t border-slate-50">
+                {navItems.map((item) => {
+                  const isActive = pathname === item.path;
+                  const Icon = item.icon;
+                  const isDropdownOpen = activeDropdown === item.name;
 
-              <div className="pt-3 mt-2 border-t border-slate-100">
+                  if (item.hasDropdown) {
+                    return (
+                      <div key={item.name} className="flex flex-col mb-0.5">
+                        <button
+                          onClick={() => toggleDropdown(item.name)}
+                          className={cn(
+                            "flex w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold items-center justify-between transition-all text-slate-700 hover:bg-slate-50",
+                            isDropdownOpen && "bg-slate-50 text-primary",
+                          )}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Icon className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                            <span>{item.name}</span>
+                          </div>
+                          <motion.div
+                            animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <ChevronDown className="w-4 h-4 text-slate-400" />
+                          </motion.div>
+                        </button>
+
+                        <AnimatePresence initial={false}>
+                          {isDropdownOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2, ease: "easeInOut" }}
+                              className="overflow-hidden pl-10 pr-2 space-y-1 bg-slate-50/70 rounded-lg mt-0.5 py-1"
+                            >
+                              {item.subItems?.map((sub) => (
+                                <Link
+                                  key={sub.path}
+                                  href={sub.path}
+                                  onClick={closeMobileMenu}
+                                  className={cn(
+                                    "block py-2 px-3 text-xs font-semibold rounded-lg text-slate-600 hover:text-primary hover:bg-primary/5 transition-all",
+                                    pathname === sub.path &&
+                                      "text-primary font-bold bg-primary/5",
+                                  )}
+                                >
+                                  {sub.name}
+                                </Link>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      onClick={closeMobileMenu}
+                      className={cn(
+                        "flex px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold items-center space-x-3 transition-all border border-transparent w-full",
+                        isActive
+                          ? "text-primary bg-primary/10 border-primary/5 shadow-xs"
+                          : "text-slate-700 hover:bg-slate-50 hover:text-primary",
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "w-4 h-4 flex-shrink-0",
+                          isActive ? "text-primary" : "text-slate-500",
+                        )}
+                      />
+                      <span className="leading-none">{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* লগইন বাটন সেকশন */}
+              <div className="p-4 bg-slate-50/60 border-t border-slate-100">
                 <Link
                   href={dashboardLink}
                   onClick={closeMobileMenu}
-                  className="flex px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-primary items-center justify-center space-x-2"
+                  className={cn(
+                    "flex w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold items-center justify-center space-x-2 text-white shadow-xs transition-all active:scale-[0.98]",
+                    user ? "bg-secondary" : "bg-primary",
+                  )}
                 >
-                  <LayoutDashboard className="w-4 h-4" />
+                  {user ? (
+                    <LayoutDashboard className="w-4 h-4" />
+                  ) : (
+                    <Lock className="w-4 h-4" />
+                  )}
                   <span>{dashboardLabel}</span>
                 </Link>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>

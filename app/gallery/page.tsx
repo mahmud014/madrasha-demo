@@ -344,7 +344,7 @@ export default function Gallery() {
               }}
               className="mt-4 text-primary font-medium hover:underline"
             >
-              {language === "bn" ? "ফিল্টার清除 করুন" : "Clear all filters"}
+              {language === "bn" ? "ফিল্টার করুন" : "Clear all filters"}
             </button>
           </div>
         )}
